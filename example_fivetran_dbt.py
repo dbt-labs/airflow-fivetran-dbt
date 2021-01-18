@@ -45,12 +45,13 @@ dag = DAG(
     tags=['example'],
 )
 
-def fivetran_connector_sync(ds, **kwargs):
+def fivetran_connector_sync(base_url='api.fivetran.com/v1/connectors/', ds, **kwargs):
     """Print the Airflow context and ds variable from the context."""
+
     #pprint(kwargs)
     #print(ds)
     #return 'Whatever you return gets printed in the logs'
-    return str(kwargs)
+    return base_url
 
 
 run_fivetran_connector_sync = PythonOperator(
