@@ -54,7 +54,7 @@ def fivetran_extract(ds, **kwargs):
 
 run_fivetran_extract = PythonOperator(
     task_id='extract_pokemon_data',
-    python_callable=fivetran_exract,
+    python_callable=fivetran_extract,
     dag=dag,
 )
 
