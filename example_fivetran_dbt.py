@@ -50,7 +50,7 @@ def fivetran_connector_sync(ds, **kwargs):
     #pprint(kwargs)
     #print(ds)
     #return 'Whatever you return gets printed in the logs'
-    return ds
+    return str(kwargs)
 
 
 run_fivetran_connector_sync = PythonOperator(
