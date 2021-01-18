@@ -53,10 +53,10 @@ def fivetran_connector_sync(ds, **kwargs):
     return ds
 
 
-run_fivetran_extract = PythonOperator(
+run_fivetran_connector_sync = PythonOperator(
     task_id='extract_pokemon_data',
-    python_callable=fivetran_extract,
+    python_callable=fivetran_connector_sync,
     dag=dag,
 )
 
-run_fivetran_extract
+run_fivetran_connector_sync
