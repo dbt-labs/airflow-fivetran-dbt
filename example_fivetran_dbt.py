@@ -45,7 +45,7 @@ dag = DAG(
     tags=['example'],
 )
 
-def fivetran_exract(ds, **kwargs):
+def fivetran_extract(ds, **kwargs):
     """Print the Airflow context and ds variable from the context."""
     pprint(kwargs)
     print(ds)
