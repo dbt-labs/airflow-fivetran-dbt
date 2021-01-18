@@ -45,11 +45,12 @@ dag = DAG(
     tags=['example'],
 )
 
-def fivetran_extract(ds, **kwargs):
+def fivetran_connector_sync(ds, **kwargs):
     """Print the Airflow context and ds variable from the context."""
-    pprint(kwargs)
-    print(ds)
-    return 'Whatever you return gets printed in the logs'
+    #pprint(kwargs)
+    #print(ds)
+    #return 'Whatever you return gets printed in the logs'
+    return ds
 
 
 run_fivetran_extract = PythonOperator(
