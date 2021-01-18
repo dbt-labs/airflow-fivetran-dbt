@@ -1,4 +1,7 @@
 
+import os
+import requests
+
 from datetime import timedelta
 from pprint import pprint
 
@@ -10,6 +13,11 @@ from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 # These args will get passed on to each operator
 # You can override them on a per-task basis during operator initialization
+
+FIVETRAN_API_KEY = os.getenv('FIVETRAN_API_KEY', '')
+BASE_URL = 'api.fivetran.com/v1/connectors/'
+
+
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
@@ -45,14 +53,21 @@ dag = DAG(
     tags=['example'],
 )
 
-def fivetran_connector_sync(ds, base_url='api.fivetran.com/v1/connectors/', **kwargs):
+def fivetran_connector_sync(ds, base_url=BASE_URL, api_route='airflow_pokemon_demo.pokedex', api_key=FIVETRAN_API_KEY, **kwargs):
     """Print the Airflow context and ds variable from the context."""
 
     #pprint(kwargs)
     #print(ds)
     #return 'Whatever you return gets printed in the logs'
-    return base_url
+    url = base_url + api_route
+    headers = {'Content-Type': 'application/json', 'Authorization': f'Basic {api_key}' }
+    data = {} # this endpoint takes an empty payload
+    response = requests.post(url, json=data, headers=headers)
 
+    if response.status_code == 200:
+        return json.loads(response.content)
+    else:
+        raise RuntimeError(response.text)
 
 run_fivetran_connector_sync = PythonOperator(
     task_id='extract_pokemon_data',
