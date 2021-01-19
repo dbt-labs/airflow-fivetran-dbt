@@ -15,7 +15,7 @@ from airflow.utils.dates import days_ago
 # You can override them on a per-task basis during operator initialization
 
 FIVETRAN_API_KEY = os.getenv('FIVETRAN_API_KEY', '')
-BASE_URL = 'api.fivetran.com/v1/'
+BASE_URL = 'https://api.fivetran.com/v1/'
 
 default_args = {
     'owner': 'airflow',
