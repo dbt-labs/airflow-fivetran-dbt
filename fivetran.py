@@ -37,7 +37,6 @@ class FivetranApi(object):
         response = requests.post(url, data=json.dumps(data), headers=headers)
         
         if response.status_code == 200:
-            self.post_run_time = datetime.now()
             return json.loads(response.content)
         else:
             raise RuntimeError(response.text)
@@ -57,7 +56,10 @@ class FivetranApi(object):
     def force_connector_sync(self, request_body={}, **kwargs):
         """Triggers a run of the target connector under connector_id"""
         connector_id = kwargs['dag_run'].conf['connector_id'] # this comes from the airflow runtime configs
-        return self._post(url_suffix=f'connectors/{connector_id}/force', data=request_body).get('data')
+        post_response = self._post(url_suffix=f'connectors/{connector_id}/force', data=request_body).get('data')
+        start_time = datetime.now()
+        kwargs['ti'].xcom_push(key='start_time', value=str(start_time))
+        return post_response
     
     def get_connector_sync_status(self, **kwargs):
         """Checks the execution status of connector"""
@@ -66,7 +68,8 @@ class FivetranApi(object):
         sync_data = self._get(url_suffix=f'connectors/{connector_id}').get('data')
         # get the sync success timestamp from the response
         succeeded_at = sync_data['succeeded_at']
-        return f'succeeded_at: {succeeded_at} --- start_time: {self.post_run_time}'
+        start_time = kwargs['ti'].xcom_pull['start_time']
+        return f'succeeded_at: {succeeded_at} --- start_time: {start_time}'
     
 
 
