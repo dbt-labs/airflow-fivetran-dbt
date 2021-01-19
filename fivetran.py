@@ -92,7 +92,7 @@ class FivetranApi(object):
             if succeeded_at > connector_sync_start_time:
                 poll_for_success = False
                 return {
-                    'message': f'successfully returned connector sync status for {connector_id}'
+                    'message': f'successfully returned connector sync status for {connector_id}',
                     'response': response
                 }
             
