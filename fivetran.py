@@ -21,7 +21,7 @@ class FivetranApi(object):
 
     def _get(self, url_suffix):
         url = self.api_base + url_suffix
-        headers = {'Authorization': 'Token %s' % self.api_token}
+        headers = {'Content-Type': 'application/json', 'Authorization': 'Basic %s' % self.api_token}
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             return json.loads(response.content)
@@ -63,6 +63,7 @@ class FivetranApi(object):
         """Checks the execution status of connector"""
         connector_id = kwargs['dag_run'].conf['connector_id'] # this comes from the airflow runtime configs
         return self._get(url_suffix=f'connectors/{connector_id}').get('data')
+    
 
 
     # def list_jobs(self):
