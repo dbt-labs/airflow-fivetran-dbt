@@ -31,7 +31,7 @@ class FivetranApi(object):
         url = self.api_base + url_suffix
         print('request url: ', url)
         print('showing request body: ', json.dumps(data))
-        headers = {'Content-Type': 'application/json', 'Authorization': 'token %s' % self.api_token}
+        headers = {'Content-Type': 'application/json', 'Authorization': 'Basic %s' % self.api_token}
 
         response = requests.post(url, data=json.dumps(data), headers=headers)
         
