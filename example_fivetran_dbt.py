@@ -88,7 +88,7 @@ def check_connector_sync_status(ds, **kwargs):
     return 'checking connector sync status'
 
 run_check_connector_sync_status = PythonOperator(
-    task_id='extract_pokemon_data',
+    task_id='check_sync_status',
     python_callable=check_connector_sync_status,
     dag=dag,
 )

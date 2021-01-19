@@ -52,7 +52,7 @@ class FivetranApi(object):
         """Returns information about the connector under connector_id"""
         return self._get(url_suffix=f'connectors/{connector_id}').get('data')
     
-    def force_connector_sync(self, connector_id, request_body={}, **kwargs):
+    def force_connector_sync(self, request_body={}, **kwargs):
         """Triggers a run of the target connector under connector_id"""
         connector_id = kwargs['dag_run'].conf['connector_id']
         return self._post(url_suffix=f'connectors/{connector_id}/force', data=request_body).get('data')
