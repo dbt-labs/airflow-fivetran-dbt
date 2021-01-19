@@ -21,6 +21,7 @@ class FivetranApi(object):
         self.fivetran_datetime_format = fivetran_datetime_format
         self.airflow_datetime_format = airflow_datetime_format
         self.api_base = 'https://api.fivetran.com/v1/'
+        self.polling_timeout = 300 # timeout in seconds on a polling loop
         
 
     def _get(self, url_suffix):
@@ -60,27 +61,44 @@ class FivetranApi(object):
     def force_connector_sync(self, request_body={}, **kwargs):
         """Triggers a run of the target connector under connector_id"""
         connector_id = kwargs['dag_run'].conf['connector_id'] # this comes from the airflow runtime configs
-        post_response = self._post(url_suffix=f'connectors/{connector_id}/force', data=request_body).get('data')
+        response = self._post(url_suffix=f'connectors/{connector_id}/force', data=request_body).get('data')
         start_time = datetime.now()
         kwargs['ti'].xcom_push(key='start_time', value=str(start_time))
-        return post_response
+        return {
+            'message': f'successfully ran connector sync for {connector_id}',
+            'response': response
+            }
     
     def get_connector_sync_status(self, **kwargs):
         """Checks the execution status of connector"""
-        connector_id = kwargs['dag_run'].conf['connector_id'] # this comes from the airflow runtime configs
-        # check on the sync data
-        sync_data = self._get(url_suffix=f'connectors/{connector_id}').get('data')
-        # get the sync success timestamp from the response
-        succeeded_at = sync_data['succeeded_at']
-        # convert succeeded_at to UTC so it matches the start_time recorded by airflow server
-        succeeded_at = datetime.strptime(succeeded_at, self.fivetran_datetime_format)
-     
+        connector_id = kwargs['dag_run'].conf['connector_id'] # this comes from the airflow runtime configs        
+        
         ti = kwargs['ti']
-        start_time = ti.xcom_pull(key = 'start_time', task_ids='start_data_sync')
-        start_time = datetime.strptime(start_time, self.airflow_datetime_format)
-
-        return f'succeeded_at: {str(succeeded_at)} --- start_time: {str(start_time)}'
-    
+        connector_sync_start_time = ti.xcom_pull(key = 'start_time', task_ids='start_data_sync')
+        connector_sync_start_time = datetime.strptime(connector_sync_start_time, self.airflow_datetime_format)
+        
+        tracker = 0
+        poll_for_success = True
+        while poll_for_success:
+            # wait a bit between polling runs 
+            time.sleep(5) 
+            # check on the sync data
+            response = self._get(url_suffix=f'connectors/{connector_id}').get('data')
+            # get the sync success timestamp from the response
+            succeeded_at = response['succeeded_at']
+            # convert succeeded_at to UTC so it matches the start_time recorded by airflow server
+            succeeded_at = datetime.strptime(succeeded_at, self.fivetran_datetime_format)
+            
+            if succeeded_at > connector_sync_start_time:
+                poll_for_success = False
+                return {
+                    'message': f'successfully returned connector sync status for {connector_id}'
+                    'response': response
+                }
+            
+            tracker += 5
+            if tracker > self.polling_timeout:
+                raise Exception(f'Error, the data sync for the {connector_id} connecter failed to complete within {self.polling_timeout} seconds')
 
 
     # def list_jobs(self):
