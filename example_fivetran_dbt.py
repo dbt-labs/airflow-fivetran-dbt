@@ -52,21 +52,27 @@ dag = DAG(
     tags=['example'],
 )
 
-def fivetran_connector_sync(ds, base_url=BASE_URL, api_route='connectors/', api_key=FIVETRAN_API_KEY, **kwargs):
+def fivetran_connector_sync(ds, base_url=BASE_URL, api_route='connectors', api_key=FIVETRAN_API_KEY, **kwargs):
     """Print the Airflow context and ds variable from the context."""
 
     #pprint(kwargs)
     #print(ds)
     #return 'Whatever you return gets printed in the logs'
-    url = base_url + api_route + 'repair_chocolate/force'
+    url = base_url + api_route + '/' + 'warn_enormously' + '/' + 'force'
     headers = {'Content-Type': 'application/json', 'Authorization': f'Basic {api_key}' }
     data = {} # this endpoint takes an empty payload
     response = requests.post(url, json=data, headers=headers)
 
     if response.status_code == 200:
         return json.loads(response.content)
+    
     else:
         raise RuntimeError(response.text)
+
+# start sync (above)
+# check sync status
+# start dbt run
+# check run status
 
 run_fivetran_connector_sync = PythonOperator(
     task_id='extract_pokemon_data',
