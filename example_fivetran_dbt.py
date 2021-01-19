@@ -111,7 +111,7 @@ run_check_dbt_job_run_status = PythonOperator(
     dag=dag,
 )
 
-run_fivetran_connector_sync >> check_connector_sync_status >> run_dbt_job_run >> check_dbt_job_run_status
+run_fivetran_connector_sync
 
 # start sync (above)
 # poll to check connector status - GET connector data
