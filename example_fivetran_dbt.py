@@ -14,14 +14,17 @@ from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 
 from fivetran import FivetranApi
+from dbt_cloud import DbtCloudApi
 
 # These args will get passed on to each operator
 # You can override them on a per-task basis during operator initialization
 
 FIVETRAN_API_KEY = os.getenv('FIVETRAN_API_KEY', '')
+DBT_ACCOUNT_ID = os.getenv('DBT_ACCOUNT_ID', '')
 DBT_API_KEY = os.getenv('DBT_API_KEY', '')
 
 ft = FivetranApi(api_token=FIVETRAN_API_KEY)
+dbt = DbtCloudApi(account_id=DBT_ACCOUNT_ID, api_token=DBT_API_KEY)
 
 default_args = {
     'owner': 'airflow',
@@ -59,39 +62,19 @@ dag = DAG(
     tags=['example'],
 )
 
-# def fivetran_connector_sync(ds, base_url=BASE_URL, api_route='connectors', api_key=FIVETRAN_API_KEY, **kwargs):
-#     """Print the Airflow context and ds variable from the context."""
-
-#     #pprint(kwargs)
-#     #print(ds)
-#     #return 'Whatever you return gets printed in the logs'
-#     connector_id = kwargs['dag_run'].conf['connector_id'] #warn_enormously
-
-#     url = base_url + api_route + '/' + connector_id + '/' + 'force'
-#     headers = {'Content-Type': 'application/json', 'Authorization': f'Basic {api_key}' }
-#     data = {} # this endpoint takes an empty payload
-#     response = requests.post(url, json=data, headers=headers)
-
-#     if response.status_code == 200:
-#         return json.loads(response.content)
-    
-#     else:
-#         raise RuntimeError(response.text)
-
 run_fivetran_connector_sync = PythonOperator(
     task_id='start_data_sync',
     python_callable=ft.force_connector_sync,
     dag=dag,
 )
 
-def check_connector_sync_status(ds, **kwargs):
-    return 'checking connector sync status'
-
 run_check_connector_sync_status = PythonOperator(
     task_id='check_sync_status',
-    python_callable=check_connector_sync_status,
+    python_callable=ft.get_connector_sync_status,
     dag=dag,
 )
+
+run_check_connector_sync_status.set_upstream(run_fivetran_connector_sync)
 
 def dbt_job_run(ds, **kwargs):
     return 'Running dbt jobx'
@@ -111,7 +94,7 @@ run_check_dbt_job_run_status = PythonOperator(
     dag=dag,
 )
 
-run_fivetran_connector_sync
+run_fivetran_connector_sync >> run_check_connector_sync_status
 
 # start sync (above)
 # poll to check connector status - GET connector data
