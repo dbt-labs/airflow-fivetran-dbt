@@ -68,7 +68,8 @@ class FivetranApi(object):
         sync_data = self._get(url_suffix=f'connectors/{connector_id}').get('data')
         # get the sync success timestamp from the response
         succeeded_at = sync_data['succeeded_at']
-        start_time = kwargs['ti'].xcom_pull['start_time']
+        ti = kwargs['ti']
+        start_time = ti.xcom_pull(key = 'start_time', task_ids='start_data_sync')
         return f'succeeded_at: {succeeded_at} --- start_time: {start_time}'
     
 
