@@ -27,7 +27,7 @@ DBT_API_KEY = os.getenv('DBT_API_KEY', '')
 
 # initialize Fivetran API module
 ft = FivetranApi(api_token=FIVETRAN_API_KEY, 
-                 fivetran_datetime_format=FIVETRAN_TIMEZONE, 
+                 fivetran_datetime_format=FIVETRAN_DATETIME_FORMAT, 
                  airflow_datetime_format=AIRFLOW_DATETIME_FORMAT)
 
 # initialize dbt Cloud module
