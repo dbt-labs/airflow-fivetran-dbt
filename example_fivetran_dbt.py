@@ -64,14 +64,12 @@ dag = DAG(
 
 run_fivetran_connector_sync = PythonOperator(
     task_id='start_data_sync',
-    provide_context=True, # set the context to enable passing variables
     python_callable=ft.force_connector_sync,
     dag=dag,
 )
 
 run_check_connector_sync_status = PythonOperator(
     task_id='check_sync_status',
-    provide_context=True,
     python_callable=ft.get_connector_sync_status,
     dag=dag,
 )
