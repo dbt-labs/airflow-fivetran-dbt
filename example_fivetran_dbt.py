@@ -15,8 +15,7 @@ from airflow.utils.dates import days_ago
 # You can override them on a per-task basis during operator initialization
 
 FIVETRAN_API_KEY = os.getenv('FIVETRAN_API_KEY', '')
-BASE_URL = 'api.fivetran.com/v1/connectors/'
-
+BASE_URL = 'api.fivetran.com/v1/'
 
 default_args = {
     'owner': 'airflow',
@@ -53,13 +52,13 @@ dag = DAG(
     tags=['example'],
 )
 
-def fivetran_connector_sync(ds, base_url=BASE_URL, api_route='airflow_pokemon_demo.pokedex', api_key=FIVETRAN_API_KEY, **kwargs):
+def fivetran_connector_sync(ds, base_url=BASE_URL, api_route='connectors/', api_key=FIVETRAN_API_KEY, **kwargs):
     """Print the Airflow context and ds variable from the context."""
 
     #pprint(kwargs)
     #print(ds)
     #return 'Whatever you return gets printed in the logs'
-    url = base_url + api_route
+    url = base_url + api_route + 'repair_chocolate/force'
     headers = {'Content-Type': 'application/json', 'Authorization': f'Basic {api_key}' }
     data = {} # this endpoint takes an empty payload
     response = requests.post(url, json=data, headers=headers)
