@@ -4,6 +4,7 @@ import json
 import requests
 import time
 from datetime import datetime
+import pytz
 
 class FivetranApi(object):
     """
@@ -15,9 +16,12 @@ class FivetranApi(object):
     * :py:meth: `run_job` - Triggers a run for a job using the job name
     """
 
-    def __init__(self, api_token):
+    def __init__(self, api_token, fivetran_datetime_format, airflow_datetime_format):
         self.api_token = api_token
+        self.fivetran_datetime_format = fivetran_datetime_format
+        self.airflow_datetime_format = airflow_datetime_format
         self.api_base = 'https://api.fivetran.com/v1/'
+        
 
     def _get(self, url_suffix):
         url = self.api_base + url_suffix
@@ -68,9 +72,14 @@ class FivetranApi(object):
         sync_data = self._get(url_suffix=f'connectors/{connector_id}').get('data')
         # get the sync success timestamp from the response
         succeeded_at = sync_data['succeeded_at']
+        # convert succeeded_at to UTC so it matches the start_time recorded by airflow server
+        succeeded_at = datetime.strptime(succeeded_at, self.fivetran_datetime_format)
+     
         ti = kwargs['ti']
         start_time = ti.xcom_pull(key = 'start_time', task_ids='start_data_sync')
-        return f'succeeded_at: {succeeded_at} --- start_time: {start_time}'
+        start_time = datetime.strptime(start_time, self.airflow_datetime_format)
+
+        return f'succeeded_at: {str(succeeded_at)} --- start_time: {str(start_time)}'
     
 
 

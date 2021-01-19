@@ -20,11 +20,19 @@ from dbt_cloud import DbtCloudApi
 # You can override them on a per-task basis during operator initialization
 
 FIVETRAN_API_KEY = os.getenv('FIVETRAN_API_KEY', '')
+FIVETRAN_DATETIME_FORMAT = os.getenv('FIVETRAN_DATETIME_FORMAT', '')
+AIRFLOW_DATETIME_FORMAT = os.getenv('AIRFLOW_DATETIME_FORMAT', '')
 DBT_ACCOUNT_ID = os.getenv('DBT_ACCOUNT_ID', '')
 DBT_API_KEY = os.getenv('DBT_API_KEY', '')
 
-ft = FivetranApi(api_token=FIVETRAN_API_KEY)
-dbt = DbtCloudApi(account_id=DBT_ACCOUNT_ID, api_token=DBT_API_KEY)
+# initialize Fivetran API module
+ft = FivetranApi(api_token=FIVETRAN_API_KEY, 
+                 fivetran_datetime_format=FIVETRAN_TIMEZONE, 
+                 airflow_datetime_format=AIRFLOW_DATETIME_FORMAT)
+
+# initialize dbt Cloud module
+dbt = DbtCloudApi(account_id=DBT_ACCOUNT_ID, 
+                  api_token=DBT_API_KEY)
 
 default_args = {
     'owner': 'airflow',
