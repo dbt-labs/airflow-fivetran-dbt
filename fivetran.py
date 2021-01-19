@@ -62,7 +62,11 @@ class FivetranApi(object):
     def get_connector_sync_status(self, **kwargs):
         """Checks the execution status of connector"""
         connector_id = kwargs['dag_run'].conf['connector_id'] # this comes from the airflow runtime configs
-        return self._get(url_suffix=f'connectors/{connector_id}').get('data')
+        # check on the sync data
+        sync_data = self._get(url_suffix=f'connectors/{connector_id}').get('data')
+        # get the sync success timestamp from the response
+        succeeded_at = sync_data['succeeded_at']
+        return f'succeeded_at: {succeeded_at} --- start_time: {self.post_run_time}'
     
 
 
