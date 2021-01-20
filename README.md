@@ -2,7 +2,12 @@
 Example orchestration pipeline for Fivetran + dbt managed by Airflow
 
 # Introduction
-This is one way to orchetstrate dbt in coordination with other tools, such as Fivetran for data loading. Our focus is on coordinating Fivetran for loading data to a warehouse, and then triggering a dbt run in an event-driven pipeline. The final step in dbt extracts the `manifest.json` from the dbt run results to capture relevant metadata for downstream logging, alerting and analysis. We did not develop code to ship the `manifest.json` to a logging system such as DataDog or Sumologic. The code provided in this repository are intended as a demonstration to build upon, *not* as a production-ready soluition. 
+This is one way to orchetstrate dbt in coordination with other tools, such as Fivetran for data loading. Our focus is on coordinating Fivetran for loading data to a warehouse, and then triggering a dbt run in an event-driven pipeline. The final step in dbt extracts the `manifest.json` from the dbt run results to capture relevant metadata for downstream logging, alerting and analysis. We did not develop code to ship the `manifest.json` to a logging system such as DataDog or Sumologic. The code provided in this repository are intended as a demonstration to build upon, *not* as a production-ready solution. 
+
+# Solution Architecture
+Below is a system diagram with a brief description of each step in the process
+
+![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/airflow-fivetran-dbt-arch.png "Solution Architecture Diagram")
 
 # What you need to run this guide
 
@@ -12,7 +17,7 @@ This is one way to orchetstrate dbt in coordination with other tools, such as Fi
 3) Source data configured in Fivetran - this guide uses Google Sheets as the source  
 4) Google Cloud Platform account  
 5) dbt Cloud account  
-6) Git repository for dbt code
+6) Git repository for dbt code. Here is a [link to ours](https://github.com/fishtown-analytics/airflow-fivetran-dbt--dbt-jobs)
 
 #### User permissions
 1) User with access to run database operations in Snowflake. dbt operates under a user account alias  
