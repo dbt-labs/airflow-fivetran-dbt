@@ -25,7 +25,7 @@ Below is a system diagram with a brief description of each step in the process
 3) User account in dbt with sufficient permissions to create database connections, repositories, and API keys. 
 4) User account in Github/Gitlab/Bitbucket etc with permissions to create repositories and associate ssh deploy keys with them. You can read more about this setup [here](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
 
-# GCP & Airflow Server Configuration
+## GCP & Airflow Server Configuration
 We mainly followed the process described in Jostein Leira's [Medium Post](https://medium.com/grensesnittet/airflow-on-gcp-may-2020-cdcdfe594019) <sup>1</sup>
 
 There are a couple of configurations we changed: 
@@ -54,7 +54,7 @@ Host *
 ![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/git-repo-ssh-keys.png "Adding Deploy Keys to a Repository")
 
 ## Aiflow Environment Setup
-Shell scripts and service configuration files are located in the `airflow-setup` folder. 
+A configuration script is located in `airflow-setup/env-setup.sh`. The user is prompted for the dbt and Fivetran API Keys as inputs and store them in environment variables. It's additionally useful to modify the environment activiation script in `/srv/airflow/bin/activate` to automatically set and unset these variables each time the environment starts.  
 
 ## Environment Variables  
 The provided Python code uses several environment variables as configuration inputs:  
@@ -65,6 +65,22 @@ The provided Python code uses several environment variables as configuration inp
 * `DBT_ACCOUNT_ID` which can be obtained from the URLs when logged in to dbt Cloud. For example in the URL cloud.getdbt.com/#/accounts/**<account-id>**/projects/<project-id>/dashboard/
 * `DBT_API_KEY` which can be obtained by navigating to Profile > API Access in dbt Cloud.
 * `DBT_DATETIME_FORMAT` set to `%Y-%m-%dT%H:%M:%S.%fZ` for a datetime like `2018-12-01T15:43:29.013729Z`
+
+## Running the code
+
+#### From the Airflow UI
+
+1) From the DAGs list, click on the run button for the  `example_fivetran_dbt_operator` DAG 
+
+
+2) Add the optional configuration JSON to the DAG. These inputs are accessed in the `dag_run` configuration variables within the python code, as follows: 
+
+```python
+connector_id = kwargs['dag_run'].conf['connector_id']
+```
+
+[alt text](placeholder "Adding configurations for a Airflow DAG run")
+
 
 
 
