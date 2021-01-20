@@ -1,3 +1,9 @@
+#!/bin/bash
+
+echo -n "Enter dbt API Key:";
+read dbt_api_key
+echo -n "Enter Fivetran API Key:";
+read -s fivetran_api_key
 
 sudo su
 apt update
@@ -10,8 +16,8 @@ adduser airflow --disabled-login --disabled-password --gecos "Airflow system use
 
 cd /srv
 
+# creates a virtual environment called "airflow"
 python3.7 -m venv airflow
-
 cd airflow
 source bin/activate
 # With an activated virtual environment
@@ -22,5 +28,5 @@ chown airflow.airflow . -R
 chmod g+rwx . -R
 
 export AIRFLOW_HOME=/srv/airflow
-
-airflow db init
+export FIVETRAN_API_KEY=$fivetran_api_key
+export DBT_API_KEY=$dbt_api_key
