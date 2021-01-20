@@ -57,7 +57,7 @@ class DbtCloudApi(object):
             "cause": "triggered from Airflow"
         }
 
-        response = self._post(url_suffix='/accounts/%s/jobs/%s/run/' % (self.account_id, job_id), json=data).get('data')
+        response = self._post(url_suffix='/accounts/%s/jobs/%s/run/' % (self.account_id, job_id), data=data).get('data')
         run_id = response['id']
         run_start_time = datetime.now()
         kwargs['ti'].xcom_push(key='dbt_run_id', value=str(run_id))
