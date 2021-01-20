@@ -99,31 +99,3 @@ class FivetranApi(object):
             tracker += 5
             if tracker > self.polling_timeout:
                 raise Exception(f'Error, the data sync for the {connector_id} connecter failed to complete within {self.polling_timeout} seconds')
-
-
-    # def list_jobs(self):
-    #     return self._get('/accounts/%s/jobs/' % self.account_id).get('data')
-
-    # def get_run(self, run_id):
-    #     return self._get('/accounts/%s/runs/%s/' % (self.account_id, run_id)).get('data')
-
-    # def trigger_job_run(self, job_id, data=None):
-
-    #     return self._post(url_suffix='/accounts/%s/jobs/%s/run/' % (self.account_id, job_id), data=data).get('data')
-
-    # def try_get_run(self, run_id, max_tries=3):
-    #     for i in range(max_tries):
-    #         try:
-    #             run = self.get_run(run_id)
-    #             return run
-    #         except RuntimeError as e:
-    #             print("Encountered a runtime error while fetching status for {}".format(run_id))
-    #             time.sleep(10)
-
-    #     raise RuntimeError("Too many failures ({}) while querying for run status".format(run_id))
-
-    # def create_job(self, data=None):
-    #     return self._post(url_suffix='/accounts/%s/jobs/' % (self.account_id), data=data)
-
-    # def update_job(self, job_id, data=None):
-    #     return self._post(url_suffix='/accounts/%s/jobs/%s/' % (self.account_id, job_id), data=data)

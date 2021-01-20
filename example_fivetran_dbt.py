@@ -33,7 +33,7 @@ dbt = DbtCloudApi(account_id=DBT_ACCOUNT_ID,
                   api_token=DBT_API_KEY,
                   airflow_datetime_format=AIRFLOW_DATETIME_FORMAT,
                   dbt_datetime_format='placeholder')
-                  
+
 args = {
     'owner': 'airflow',
     'start_date': datetime.now()
@@ -53,15 +53,15 @@ run_fivetran_connector_sync = PythonOperator(
     dag=dag,
 )
 
-run_check_connector_sync_status = PythonOperator(
-    task_id='check_connector_sync_status',
+run_get_connector_sync_status = PythonOperator(
+    task_id='get_connector_sync_status',
     python_callable=ft.get_connector_sync_status,
     dag=dag,
 )
 
 run_dbt_job = PythonOperator(
     task_id='dbt_job',
-    python_callable=dbt.trigger_job_run,
+    python_callable=dbt.run_job,
     dag=dag,
 )
 
