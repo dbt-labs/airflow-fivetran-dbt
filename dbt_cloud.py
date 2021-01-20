@@ -121,6 +121,13 @@ class DbtCloudApi(object):
             'response': trigger_resp
         }
 
+    def get_job_run_manifest(self, **kwargs):
+        """Returns the job run artifacts from a given job run"""
+        ti = kwargs['ti']
+        run_id = ti.xcom_pull(key='dbt_run_id', task_ids='dbt_job')
+        artifact_path = 'manifest.json'
+        return self._get(url_suffix=f'/accounts/{self.account_id}/runs/{run_id}/artifacts/{artifact_path}')
+
     def create_job(self, data=None, **kwargs):
         return self._post(url_suffix='/accounts/%s/jobs/' % (self.account_id), data=data)
 

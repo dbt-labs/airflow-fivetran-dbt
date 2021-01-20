@@ -75,10 +75,19 @@ run_get_dbt_job_status = PythonOperator(
     dag=dag,
 )
 
+run_extract_dbt_job_run_manifest = PythonOperator(
+    task_id='extract_dbt_job_run_manifest ',
+    python_callable=dbt.get_job_run_manifest,
+    dag=dag,
+)
+
 # set upstream / downstream relationships for the apps
 run_get_connector_sync_status.set_upstream(run_fivetran_connector_sync)
 run_dbt_job.set_upstream(run_get_connector_sync_status)
 run_get_dbt_job_status.set_upstream(run_dbt_job)
+run_extract_dbt_job_run_manifest.set_upstream(run_get_dbt_job_status)
 
 # create the DAG pipeline
-run_fivetran_connector_sync >> run_get_connector_sync_status >> run_dbt_job >> run_get_dbt_job_status
+run_fivetran_connector_sync >> run_get_connector_sync_status >> \
+run_dbt_job >> run_get_dbt_job_status >> \
+run_extract_dbt_job_run_manifest

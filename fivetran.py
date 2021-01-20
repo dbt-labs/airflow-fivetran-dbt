@@ -78,6 +78,9 @@ class FivetranApi(object):
         connector_sync_start_time = ti.xcom_pull(key = 'start_time', task_ids='fivetran_connector_sync')
         connector_sync_start_time = datetime.strptime(connector_sync_start_time, self.airflow_datetime_format)
         
+        # use this polling process with a timeout, because fivetran
+        # returns the last time a given connector sync completed
+        # this COULD BE from a prior run of the sync process
         tracker = 0
         poll_for_success = True
         while poll_for_success:
