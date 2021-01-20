@@ -84,7 +84,7 @@ The provided Python code uses several environment variables as configuration inp
 connector_id = kwargs['dag_run'].conf['connector_id']
 ```
 
-[alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/airflow-dag-trigger-ui.png "Adding configurations for a Airflow DAG run")
+![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/airflow-dag-trigger-ui.png "Adding configurations for a Airflow DAG run")
 
 #### From the command line
 With your virtual environment activated, run:  
