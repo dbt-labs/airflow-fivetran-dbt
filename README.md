@@ -2,12 +2,24 @@
 Example orchestration pipeline for Fivetran + dbt managed by Airflow
 
 # Introduction
-This is one way to orchetstrate dbt in coordination with other tools, such as Fivetran for data loading. Our focus is on coordinating Fivetran for loading data to a warehouse, and then triggering a dbt run in an event-driven pipeline. The final step in dbt extracts the `manifest.json` from the dbt run results to capture relevant metadata for downstream logging, alerting and analysis. We did not develop code to ship the `manifest.json` to a logging system such as DataDog or Sumologic. The code provided in this repository are intended as a demonstration to build upon, *not* as a production-ready solution. 
+This is one way to orchetstrate dbt in coordination with other tools, such as Fivetran for data loading. Our focus is on coordinating Fivetran for loading data to a warehouse, and then triggering a dbt run in an event-driven pipeline. We use the Fivetran  and dbt Cloud APIs to accomplish this, with Airflow managing the scheduling / orchestration of the job flow. The final step extracts the `manifest.json` from the dbt run results to capture relevant metadata for downstream logging, alerting and analysis. The code provided in this repository are intended as a demonstration to build upon, *not* as a production-ready solution. 
+
+# Highlights
+- logical isolation of data load (Fivetran), data transform (dbt) and orchestration (Airflow) functions
+- avoids complexity of re-creating dbt DAG in Airflow, which we've seen implemented at a few clients  
+- demonstrates orchestrating Fivetran and dbt in an event-driven pipeline  
+- configurable approach which can be extended to handle additional Fivetran connectors and dbt job definitions  
+- captures relevant data from a job run which could be shipped to downstream logging & analytics services. It would also be feasible to log interim job status data using this setup, though we did not build it  into the current python codebase
 
 # Solution Architecture
 Below is a system diagram with a brief description of each step in the process
 
 ![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/airflow-fivetran-dbt-arch.png "Solution Architecture Diagram")
+
+# DAG Setup
+If you are already using Airflow, you may want to skip the implementation guide below and focus on the key parts of the python code which enable this workflow. The DAG process we implemented looks like this: 
+
+![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/airflow-dag-process.png "Airflow DAG")
 
 # What you need to run this guide
 
@@ -59,7 +71,7 @@ Host *
 ![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/git-repo-ssh-keys.png "Adding Deploy Keys to a Repository")
 
 ## Git Repository Configuration
-Once you've set up the ssh key as described above, 
+Once you've set ssh keys for both the airflow and dbt code repositories, you can set up the respective codebases on the airflow server and in dbt Cloud. 
 
 ## Environment Variables  
 The provided Python code uses several environment variables as configuration inputs:  
@@ -77,7 +89,6 @@ The provided Python code uses several environment variables as configuration inp
 
 1) From the DAGs list, click on the run button for the  `example_fivetran_dbt_operator` DAG 
 
-
 2) Add the optional configuration JSON to the DAG. These inputs are accessed in the `dag_run` configuration variables within the python code, as follows: 
 
 ```python
@@ -89,16 +100,10 @@ connector_id = kwargs['dag_run'].conf['connector_id']
 #### From the command line
 With your virtual environment activated, run:  
 ```shell
-airflow dags trigger --conf '{"connector_id": "warn_enormously", "dbt_job_name": "pokemon_aggregation_job"}' example_parametrized_dag
+airflow dags trigger --conf '{"connector_id": "warn_enormously", "dbt_job_name": "pokemon_aggregation_job"}' example_fivetran_dbt_operator
 ```
-
 
 Sources
 ======
 <sup>1</sup> GCP Setup Guide created by Jostein Leira: https://medium.com/grensesnittet/airflow-on-gcp-may-2020-cdcdfe594019
 
-
-How we set up dbt projects
-SSO Documentation for Azure
-Codegen package
-dbt and Snowflake project setup
