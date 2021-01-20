@@ -32,7 +32,7 @@ This is a simplified workflow meant to illustrate the coordination role Airflow 
 ## dbt Job DAG
 The dbt job run against this data is defined in [this repository](https://github.com/fishtown-analytics/airflow-fivetran-dbt--dbt-jobs). It runs a simple aggregation of the input source data to summarize the average HP per pokemon catch_number. It looks like this: 
 
-![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/dbt-lineage-graph.png, "dbt Lineage Graph")
+![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/dbt-lineage-graph.png "dbt Lineage Graph")
 
 # What you need to run this guide
 
