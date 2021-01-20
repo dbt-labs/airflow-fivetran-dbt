@@ -16,9 +16,7 @@ from airflow.utils.dates import days_ago
 from fivetran import FivetranApi
 from dbt_cloud import DbtCloudApi
 
-# These args will get passed on to each operator
-# You can override them on a per-task basis during operator initialization
-
+# these are environment variables stored on the virtual environment where airflow is running
 FIVETRAN_API_KEY = os.getenv('FIVETRAN_API_KEY', '')
 FIVETRAN_DATETIME_FORMAT = os.getenv('FIVETRAN_DATETIME_FORMAT', '')
 AIRFLOW_DATETIME_FORMAT = os.getenv('AIRFLOW_DATETIME_FORMAT', '')
@@ -34,14 +32,14 @@ ft = FivetranApi(api_token=FIVETRAN_API_KEY,
 dbt = DbtCloudApi(account_id=DBT_ACCOUNT_ID, 
                   api_token=DBT_API_KEY)
 
-default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'email': ['airflow@fishtownanalytics.com'],
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
+#default_args = {
+    #'owner': 'airflow',
+    #'depends_on_past': False,
+    #'email': ['airflow@fishtownanalytics.com'],
+    #'email_on_failure': False,
+    #'email_on_retry': False,
+    #'retries': 1,
+    #'retry_delay': timedelta(minutes=5),
     # 'queue': 'bash_queue',
     # 'pool': 'backfill',
     # 'priority_weight': 10,
@@ -71,44 +69,33 @@ dag = DAG(
 )
 
 run_fivetran_connector_sync = PythonOperator(
-    task_id='start_data_sync',
+    task_id='fivetran_connector_sync',
     python_callable=ft.force_connector_sync,
     dag=dag,
 )
 
 run_check_connector_sync_status = PythonOperator(
-    task_id='check_sync_status',
+    task_id='check_connector_sync_status',
     python_callable=ft.get_connector_sync_status,
     dag=dag,
 )
 
+run_dbt_job = PythonOperator(
+    task_id='dbt_job',
+    python_callable=dbt.trigger_job_run,
+    dag=dag,
+)
+
+# run_check_dbt_job_status = PythonOperator(
+#     task_id='check_dbt_job_status',
+#     python_callable=check_dbt_job_run_status,
+#     dag=dag,
+# )
+
+# set upstream / downstream relationships for the apps
 run_check_connector_sync_status.set_upstream(run_fivetran_connector_sync)
+run_dbt_job.set_upstream(run_check_connector_sync_status)
 
-def dbt_job_run(ds, **kwargs):
-    return 'Running dbt jobx'
 
-run_dbt_job_run = PythonOperator(
-    task_id='dbt_job_run',
-    python_callable=dbt_job_run,
-    dag=dag,
-)
-
-def check_dbt_job_run_status(ds, **kwargs):
-    return 'checking dbt job run status'
-
-run_check_dbt_job_run_status = PythonOperator(
-    task_id='check_dbt_job_run_status',
-    python_callable=check_dbt_job_run_status,
-    dag=dag,
-)
-
-run_fivetran_connector_sync >> run_check_connector_sync_status
-
-# start sync (above)
-# poll to check connector status - GET connector data
-## verify whether last succeeded date is after the trigger date
-## if so, start dbt run
-
-# start dbt run
-
-# check run status
+# create the DAG pipeline
+run_fivetran_connector_sync >> run_check_connector_sync_status >> run_dbt_job

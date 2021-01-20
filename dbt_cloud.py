@@ -3,6 +3,7 @@
 import json
 import requests
 import time
+from datetime import datetime
 
 class DbtCloudApi(object):
     """
@@ -14,10 +15,12 @@ class DbtCloudApi(object):
     * :py:meth: `run_job` - Triggers a run for a job using the job name
     """
 
-    def __init__(self, account_id, api_token):
+    def __init__(self, account_id, api_token, airflow_datetime_format, dbt_datetime_format):
         self.account_id = account_id
         self.api_token = api_token
         self.api_base = 'https://cloud.getdbt.com/api/v2'
+        self.airflow_datetime_format = airflow_datetime_format
+        self.dbt_datetime_format = dbt_datetime_format
 
     def _get(self, url_suffix):
         url = self.api_base + url_suffix
@@ -41,17 +44,26 @@ class DbtCloudApi(object):
         else:
             raise RuntimeError(response.text)
 
-    def list_jobs(self):
+    def list_jobs(self, **kwargs):
         return self._get('/accounts/%s/jobs/' % self.account_id).get('data')
 
-    def get_run(self, run_id):
+    def get_run(self, run_id, **kwargs):
         return self._get('/accounts/%s/runs/%s/' % (self.account_id, run_id)).get('data')
 
-    def trigger_job_run(self, job_id, data=None):
+    def trigger_job_run(self, **kwargs):
+        job_id = kwargs['dag_run'].conf['dbt_job_id']
+        response = self._post(url_suffix='/accounts/%s/jobs/%s/run/' % (self.account_id, job_id), data=data).get('data')
+        run_id = response['id']
+        run_start_time = datetime.now()
+        kwargs['ti'].xcom_push(key='dbt_run_id', value=str(run_id))
+        kwargs['ti'].xcom_push(key='dbt_run_start_time', value=str(run_start_time))
+        
+        return {
+            'message': 'successfully triggered job ',
+            'response': response
+            }
 
-        return self._post(url_suffix='/accounts/%s/jobs/%s/run/' % (self.account_id, job_id), data=data).get('data')
-
-    def try_get_run(self, run_id, max_tries=3):
+    def try_get_run(self, run_id, max_tries=3, **kwargs):
         for i in range(max_tries):
             try:
                 run = self.get_run(run_id)
@@ -62,7 +74,7 @@ class DbtCloudApi(object):
 
         raise RuntimeError("Too many failures ({}) while querying for run status".format(run_id))
 
-    def run_job(self, job_name, data=None):
+    def run_job(self, job_name, data=None, **kwargs):
         jobs = self.list_jobs()
 
         job_matches = [j for j in jobs if j['name'] == job_name]
@@ -75,8 +87,8 @@ class DbtCloudApi(object):
         trigger_resp = self.trigger_job_run(job_id=job_def['id'], data=data)
         return trigger_resp
 
-    def create_job(self, data=None):
+    def create_job(self, data=None, **kwargs):
         return self._post(url_suffix='/accounts/%s/jobs/' % (self.account_id), data=data)
 
-    def update_job(self, job_id, data=None):
+    def update_job(self, job_id, data=None, **kwargs):
         return self._post(url_suffix='/accounts/%s/jobs/%s/' % (self.account_id, job_id), data=data)
