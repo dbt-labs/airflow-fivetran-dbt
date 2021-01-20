@@ -53,7 +53,7 @@ dbt = DbtCloudApi(account_id=DBT_ACCOUNT_ID,
     # 'on_retry_callback': another_function,
     # 'sla_miss_callback': yet_another_function,
     # 'trigger_rule': 'all_success'
-}
+#}
 
 args = {
     'owner': 'airflow',
