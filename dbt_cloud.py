@@ -50,25 +50,15 @@ class DbtCloudApi(object):
     def get_run(self, run_id, **kwargs):
         return self._get('/accounts/%s/runs/%s/' % (self.account_id, run_id)).get('data')
 
-    def trigger_job_run(self, job_id, **kwargs):
+    def trigger_job_run(self, job_id):
         #job_id = kwargs['dag_run'].conf['dbt_job_id']
         
         data = {
             "cause": "triggered from Airflow"
         }
 
-        response = self._post(url_suffix='/accounts/%s/jobs/%s/run/' % (self.account_id, job_id), data=data).get('data')
-        run_id = response['id']
-        run_start_time = datetime.now()
+        return self._post(url_suffix='/accounts/%s/jobs/%s/run/' % (self.account_id, job_id), data=data).get('data')
         
-        kwargs['ti'].xcom_push(key='dbt_run_id', value=str(run_id))
-        kwargs['ti'].xcom_push(key='dbt_run_start_time', value=str(run_start_time))
-        
-        return {
-            'message': 'successfully triggered job ',
-            'response': response
-            }
-
     def get_dbt_job_run_status(self, max_tries=3, **kwargs):
         
         ti = kwargs['ti']
@@ -99,8 +89,17 @@ class DbtCloudApi(object):
 
         job_def = job_matches[0]
 
+        run_start_time = datetime.now()
         trigger_resp = self.trigger_job_run(job_id=job_def['id'], data=data)
-        return trigger_resp
+        
+        run_id = trigger_resp['id']
+        kwargs['ti'].xcom_push(key='dbt_run_id', value=str(run_id))
+        kwargs['ti'].xcom_push(key='dbt_run_start_time', value=str(run_start_time))
+
+        return {
+            'message': f'successfully triggered job {job_name}'
+            'response': trigger_resp
+        }
 
     def create_job(self, data=None, **kwargs):
         return self._post(url_suffix='/accounts/%s/jobs/' % (self.account_id), data=data)

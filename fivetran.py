@@ -64,6 +64,7 @@ class FivetranApi(object):
         response = self._post(url_suffix=f'connectors/{connector_id}/force', data=request_body).get('data')
         start_time = datetime.now()
         kwargs['ti'].xcom_push(key='start_time', value=str(start_time))
+        
         return {
             'message': f'successfully ran connector sync for {connector_id}',
             'response': response

@@ -36,7 +36,8 @@ dbt = DbtCloudApi(account_id=DBT_ACCOUNT_ID,
 
 args = {
     'owner': 'airflow',
-    'start_date': datetime.now()
+    'start_date': datetime.now(),
+    'provide_context': True
 }
 
 dag = DAG(
