@@ -35,7 +35,7 @@ class DbtCloudApi(object):
         url = self.api_base + url_suffix
         print('request url: ', url)
         print('showing request body: ', json.dumps(data))
-        headers = {'Content-Type': 'application/json', 'Authorization': 'token %s' % self.api_token}
+        headers = {'Content-Type': 'application/json', 'Authorization': 'Token %s' % self.api_token}
 
         response = requests.post(url, data=json.dumps(data), headers=headers)
         
@@ -52,7 +52,12 @@ class DbtCloudApi(object):
 
     def trigger_job_run(self, **kwargs):
         job_id = kwargs['dag_run'].conf['dbt_job_id']
-        response = self._post(url_suffix='/accounts/%s/jobs/%s/run/' % (self.account_id, job_id), data=data).get('data')
+        
+        data = {
+            "cause": "triggered from Airflow"
+        }
+
+        response = self._post(url_suffix='/accounts/%s/jobs/%s/run/' % (self.account_id, job_id), json=data).get('data')
         run_id = response['id']
         run_start_time = datetime.now()
         kwargs['ti'].xcom_push(key='dbt_run_id', value=str(run_id))
