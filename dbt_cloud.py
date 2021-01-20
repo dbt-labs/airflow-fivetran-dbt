@@ -50,12 +50,7 @@ class DbtCloudApi(object):
     def get_run(self, run_id, **kwargs):
         return self._get('/accounts/%s/runs/%s/' % (self.account_id, run_id)).get('data')
 
-    def trigger_job_run(self, job_id):
-        #job_id = kwargs['dag_run'].conf['dbt_job_id']
-        
-        data = {
-            "cause": "triggered from Airflow"
-        }
+    def trigger_job_run(self, job_id, data=None):
 
         return self._post(url_suffix='/accounts/%s/jobs/%s/run/' % (self.account_id, job_id), data=data).get('data')
         
@@ -77,7 +72,7 @@ class DbtCloudApi(object):
 
         # raise RuntimeError("Too many failures ({}) while querying for run status".format(run_id))
 
-    def run_job(self, data=None, **kwargs):
+    def run_job(self, **kwargs):
         job_name = kwargs['dag_run'].conf['dbt_job_name']
 
         jobs = self.list_jobs()
@@ -88,6 +83,10 @@ class DbtCloudApi(object):
             raise Exception("{} jobs found for {}".format(len(job_matches), job_name))
 
         job_def = job_matches[0]
+
+        data = {
+            "cause": "triggered from Airflow"
+        }
 
         run_start_time = datetime.now()
         trigger_resp = self.trigger_job_run(job_id=job_def['id'], data=data)
