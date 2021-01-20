@@ -47,6 +47,12 @@ Host *
   UseKeychain yes
   IdentityFile ~/.ssh/id_ed25519
 ```
+* Add the ssh key to the agent: `ssh-add -K ~/.ssh/<your-key-pair-name>`
+* It's useful to add a line to your `.bashrc` or `.zshrc` file to automatically start the agent and add your ssh keys each time you open a terminal. 
+* Add the key to your repository: 
+
+![alt-text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/git-repo-ssh-keys.png, "Adding Deploy Keys to a Repository")
+
 
 ## Aiflow Environment Setup
 Shell scripts and service configuration files are located in the `airflow-setup` folder. 
