@@ -24,3 +24,12 @@ Below is a system diagram with a brief description of each step in the process
 2) User account in Fivetran with permissions to create new connectors. In this example, we use Google Sheets as the connector source data. You will also need sufficient permissions (or a friend who has them :) ) to obtain an API token and secret from the Fivetran Admin console as described [here](https://fivetran.com/docs/rest-api/getting-started)  
 3) User account in dbt with sufficient permissions to create database connections, repositories, and API keys. 
 4) User account in Github/Gitlab/Bitbucket etc with permissions to create repositories and associate ssh deploy keys with them. You can read more about this setup [here](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
+
+# GCP Configuration
+We mainly followed the process described in 
+
+
+
+Sources
+======
+<sup>1</sup> GCP Setup Guide created by Jostein Leira: https://www.google.com/search?q=airflow+on+gcp&oq=airflow+on+gcp&aqs=chrome..69i57j0i22i30l2j0i22i30i395l4j69i60.2077j1j7&sourceid=chrome&ie=UTF-8
