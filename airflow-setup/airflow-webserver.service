@@ -1,0 +1,16 @@
+[Unit]
+Description=Airflow webserver daemon
+After=network.target postgresql.service mysql.service
+Wants=postgresql.service mysql.service
+
+[Service]
+User=airflow
+Group=airflow
+Type=simple
+ExecStart=/srv/airflow-2.0/airflow-webserver.sh
+Restart=on-failure
+RestartSec=5s
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
