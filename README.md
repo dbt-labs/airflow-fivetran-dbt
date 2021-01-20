@@ -21,6 +21,14 @@ If you are already using Airflow, you may want to skip the implementation guide 
 
 ![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/airflow-dag-process.png "Airflow DAG")
 
+This is a simplified workflow meant to illustrate the coordination role Airflow can play between a data loading system like Fivetran and dbt. The key links in the chain are formed by using Airflow [XComs](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html?highlight=xcom#concepts-xcom). The DAG takes as runtime input a mapping as follows: 
+```
+    { 
+    "connector_id": "warn_enormously",
+    "dbt_job_name": "pokemon_aggregation_job"
+    }
+```
+
 # What you need to run this guide
 
 #### Systems
