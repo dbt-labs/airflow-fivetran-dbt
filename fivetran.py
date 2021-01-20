@@ -9,11 +9,11 @@ import pytz
 class FivetranApi(object):
     """
     Class for interacting with the Fivetran API
-    * :py:meth:`list_jobs` - list all Jobs for the specified Account ID
-    * :py:meth:`get_run` - Get information about a specified Run ID
-    * :py:meth:`trigger_job_run` - Trigger a Run for a specified Job ID
-    * :py:meth: `try_get_run` - Attempts to get information about a specific Run ID for up to max_tries
-    * :py:meth: `run_job` - Triggers a run for a job using the job name
+    * :py:meth:`get_groups` - list all groups in the target account
+    * :py:meth:`get_group_connectors` - list all connectors attached to a given group
+    * :py:meth:`get_connector` - get connector information
+    * :py:meth: `force_connector_sync` - Trigger a sync of the connector's target dataset
+    * :py:meth: `get_connector_sync_status` - Return the status of connector sync process
     """
 
     def __init__(self, api_token, fivetran_datetime_format, airflow_datetime_format):
