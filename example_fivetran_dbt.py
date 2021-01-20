@@ -19,9 +19,12 @@ from dbt_cloud import DbtCloudApi
 # these are environment variables stored on the virtual environment where airflow is running
 FIVETRAN_API_KEY = os.getenv('FIVETRAN_API_KEY', '')
 FIVETRAN_DATETIME_FORMAT = os.getenv('FIVETRAN_DATETIME_FORMAT', '')
+
 AIRFLOW_DATETIME_FORMAT = os.getenv('AIRFLOW_DATETIME_FORMAT', '')
+
 DBT_ACCOUNT_ID = os.getenv('DBT_ACCOUNT_ID', '')
 DBT_API_KEY = os.getenv('DBT_API_KEY', '')
+DBT_DATETIME_FORMAT = os.getenv('DBT_DATETIME_FORMAT', '')
 
 # initialize Fivetran API module
 ft = FivetranApi(api_token=FIVETRAN_API_KEY, 
@@ -32,7 +35,7 @@ ft = FivetranApi(api_token=FIVETRAN_API_KEY,
 dbt = DbtCloudApi(account_id=DBT_ACCOUNT_ID, 
                   api_token=DBT_API_KEY,
                   airflow_datetime_format=AIRFLOW_DATETIME_FORMAT,
-                  dbt_datetime_format='placeholder')
+                  dbt_datetime_format=DBT_DATETIME_FORMAT)
 
 args = {
     'owner': 'airflow',
