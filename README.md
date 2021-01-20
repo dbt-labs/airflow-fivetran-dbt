@@ -10,17 +10,18 @@ This is one way to orchetstrate dbt in coordination with other tools, such as Fi
 3. [Airflow DAG](#Airflow-DAG)  
 4. [dbt Job DAG](#dbt-Job-DAG)  
 5. [How to Guide](#How-to-Guide)   
-    * [Systems](#Systems)  
-    * [User permissions](#User-permissions)
-    * [Airflow server configuration](#Airflow-server-configuration)
-    * [Aiflow environment setup](#Aiflow-environment-setup)
-    * [SSH key configuration in Github](#SSH-key-configuration-in-Github)
-    * [Git repository configuration](#Git-repository-configuration)
-    * [Environment variables](#Environment-variables)
-    * [Running the code](#Running-the-code)
+   * [Systems](#Systems)  
+   * [User permissions](#User-permissions)
+   * [Airflow server configuration](#Airflow-server-configuration)
+   * [Aiflow environment setup](#Aiflow-environment-setup)
+   * [SSH key configuration in Github](#SSH-key-configuration-in-Github)
+   * [Git repository configuration](#Git-repository-configuration)
+   * [Environment variables](#Environment-variables)
+   * [Running the code](#Running-the-code)
 
 ## Highlights
 - logical isolation of data load (Fivetran), data transform (dbt) and orchestration (Airflow) functions
+- Airflow code would be portable to a tool like [Astronomer](https://www.astronomer.io/)  
 - avoids complexity of re-creating dbt DAG in Airflow, which we've seen implemented at a few clients  
 - demonstrates orchestrating Fivetran and dbt in an event-driven pipeline  
 - configurable approach which can be extended to handle additional Fivetran connectors and dbt job definitions  
