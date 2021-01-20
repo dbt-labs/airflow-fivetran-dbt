@@ -12,12 +12,12 @@ This is one way to orchetstrate dbt in coordination with other tools, such as Fi
 5. [How to Guide](#How-to-Guide)   
     * [Systems](#Systems)  
     * [User permissions](#User-permissions)
-6. [Airflow server configuration](#Airflow-server-configuration)
-7. [Aiflow environment setup](#Aiflow-environment-setup)
-8. [SSH key configuration in Github](#SSH-key-configuration-in-Github)
-9. [Git repository configuration](#Git-repository-configuration)
-10. [Environment variables](#Environment-variables)
-11. [Running the code](#Running-the-code)
+    * [Airflow server configuration](#Airflow-server-configuration)
+    * [Aiflow environment setup](#Aiflow-environment-setup)
+    * [SSH key configuration in Github](#SSH-key-configuration-in-Github)
+    * [Git repository configuration](#Git-repository-configuration)
+    * [Environment variables](#Environment-variables)
+    * [Running the code](#Running-the-code)
 
 ## Highlights
 - logical isolation of data load (Fivetran), data transform (dbt) and orchestration (Airflow) functions
@@ -65,19 +65,19 @@ The dbt job run against this data is defined in [this repository](https://github
 3) User account in dbt with sufficient permissions to create database connections, repositories, and API keys. 
 4) User account in Github/Gitlab/Bitbucket etc with permissions to create repositories and associate ssh deploy keys with them. You can read more about this setup [here](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
 
-## Airflow server configuration
+#### Airflow server configuration
 We mainly followed the process described in Jostein Leira's [Medium Post](https://medium.com/grensesnittet/airflow-on-gcp-may-2020-cdcdfe594019) <sup>1</sup>
 
 There are a couple of configurations we changed: 
 - Whitelist only the [Google IP Ranges](https://support.google.com/a/answer/60764?hl=en) and any developer IP addresses  
 - Install apache-airflow version `2.0.0` instead of `1.10.10`. Note that airflow command syntax changed slightly across major versions. The Airflow v2.0.0 CLI command syntax is documented [here](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html)  
 
-## Aiflow environment setup
+#### Aiflow environment setup
 A configuration script is located [here](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/airflow-setup/env-setup.sh). The user is prompted for the dbt and Fivetran API Keys as inputs and store them in environment variables. It's additionally useful to modify the environment activiation script in `/srv/airflow/bin/activate` to automatically set and unset these variables each time the environment starts.  
 
 After running the shell script referenced above, verify you have a new directory under `/srv/airflow`. You should be able to run `source bin/activate` from this location to start your virtual environment.
 
-## SSH key configuration in Github
+#### SSH key configuration in Github
 We use ssh keys to manage both this git repository and the one containing dbt code. You need access to manage ssh keys for your repository (in Settings > Deploy Keys > Add Key). Below is an example of creating an ssh key and granting access in Github: 
 
 * Generate ssh key: `$ ssh-keygen -t ed25519 -C "your_email@example.com"`  
@@ -98,10 +98,10 @@ Host *
 
 ![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/git-repo-ssh-keys.png "Adding Deploy Keys to a Repository")
 
-## Git repository configuration
+#### Git repository configuration
 Once you've set ssh keys for both the airflow and dbt code repositories, you clone the respective codebases on the airflow server and in dbt Cloud. Instructions for configuring Github repositories in dbt Cloud are [here](https://docs.getdbt.com/docs/dbt-cloud/cloud-configuring-dbt-cloud/cloud-installing-the-github-application)
 
-## Environment variables  
+#### Environment variables  
 The provided Python code uses several environment variables as configuration inputs:  
 
 * `FIVETRAN_API_KEY`: This is a base64 encoded value of your account's `<api-key>:<api-secret>`. [This link from Fivetran](https://fivetran.com/docs/rest-api/getting-started) documents how to generate this value. For example, an API key of `d9c4511349dd4b86` and API secret of `1f6f2d161365888a1943160ccdb8d968` encode to `ZDljNDUxMTM0OWRkNGI4NjoxZjZmMmQxNjEzNjU4ODhhMTk0MzE2MGNjZGI4ZDk2OA==`. The specific values will be different on your system.  
@@ -111,9 +111,9 @@ The provided Python code uses several environment variables as configuration inp
 * `DBT_API_KEY` which can be obtained by navigating to Profile > API Access in dbt Cloud.
 * `DBT_DATETIME_FORMAT` set to `%Y-%m-%dT%H:%M:%S.%fZ` for a datetime like `2018-12-01T15:43:29.013729Z`
 
-## Running the code
+#### Running the code
 
-#### From the Airflow UI
+-- From the Airflow UI -- 
 
 1) From the DAGs list, click on the run button for the  `example_fivetran_dbt_operator` DAG 
 
@@ -125,7 +125,7 @@ connector_id = kwargs['dag_run'].conf['connector_id']
 
 ![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/airflow-dag-trigger-ui.png "Adding configurations for a Airflow DAG run")
 
-#### From the command line
+ -- From the command line --
 With your virtual environment activated, run:  
 ```shell
 airflow dags trigger --conf '{"connector_id": "warn_enormously", "dbt_job_name": "pokemon_aggregation_job"}' example_fivetran_dbt_operator
