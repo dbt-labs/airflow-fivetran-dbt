@@ -21,6 +21,7 @@ class DbtCloudApi(object):
         self.api_base = 'https://cloud.getdbt.com/api/v2'
         self.airflow_datetime_format = airflow_datetime_format
         self.dbt_datetime_format = dbt_datetime_format
+        self.polling_timeout = 300 # timeout in seconds on polling loop
 
     def _get(self, url_suffix):
         url = self.api_base + url_suffix
@@ -55,36 +56,33 @@ class DbtCloudApi(object):
         return self._post(url_suffix='/accounts/%s/jobs/%s/run/' % (self.account_id, job_id), data=data).get('data')
         
     def get_dbt_job_run_status(self, max_tries=3, **kwargs):
-        
+        job_name = kwargs['dag_run'].conf['dbt_job_name']
+
         ti = kwargs['ti']
         run_id = ti.xcom_pull(key='dbt_run_id', task_ids='dbt_job')
         dbt_job_run_start_time = ti.xcom_pull(key = 'dbt_run_start_time', task_ids='dbt_job')
         dbt_job_run_start_time = datetime.strptime(dbt_job_run_start_time, self.airflow_datetime_format)
         
-        tracker = 0
-        poll_for_success = True
-        #while poll_for_success:
-            # wait a few ticks before polling for the run status
-        #    time.sleep(5)
-            
-            # check finished_at from runtime
-        run_response = self.get_run(run_id=run_id)
-        run_finish_time = run_response['finished_at']
+        tracker = 0        
+        # initialize this to None, then poll for updates
+        # when the run_finished_at variable populates, we are done polling
+        run_finished_at = None 
+        run_response = None
+        while not run_finished_at:
+            # wait a bit between polls
+            time.sleep(5)
 
-        #run_finish_time = datetime.strptime(run_finish_time, self.dbt_datetime_format)
-            
-        return f'run start: {str(dbt_job_run_start_time)} -- run finish: {str(run_finish_time)}'
+            run_response = self.get_run(run_id=run_id)
+            run_finished_at = run_response['finished_at']
 
-        # for i in range(max_tries):
-        #     try:
-        #         run = self.get_run(run_id)
-        #         return run
-            
-        #     sexcept RuntimeError as e:
-        #         print("Encountered a runtime error while fetching status for {}".format(run_id))
-        #         time.sleep(10)
-
-        # raise RuntimeError("Too many failures ({}) while querying for run status".format(run_id))
+            tracker += 5
+            if tracker > self.polling_timeout:
+                raise Exception(f'Error, the data sync for the {connector_id} connecter failed to complete within {self.polling_timeout} seconds')
+        
+        return {
+            'message': f'job {job_name} finished running at {run_finished_at}',
+            'response': run_response
+            }
 
     def run_job(self, **kwargs):
         job_name = kwargs['dag_run'].conf['dbt_job_name']
