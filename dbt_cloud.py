@@ -58,8 +58,22 @@ class DbtCloudApi(object):
         
         ti = kwargs['ti']
         run_id = ti.xcom_pull(key='dbt_run_id', task_ids='dbt_job')
+        dbt_job_run_start_time = ti.xcom_pull(key = 'dbt_run_start_time', task_ids='dbt_job')
+        dbt_job_run_start_time = datetime.strptime(dbt_job_run_start_time, self.airflow_datetime_format)
+        
+        tracker = 0
+        poll_for_success = True
+        while poll_for_success:
+            # wait a few ticks before polling for the run status
+            time.sleep(5)
+            
+            # check finished_at from runtime
+            run_response = self.get_run(run_id=run_id)
+            run_finish_time = run_response['finished_at']
 
-        return f'run_id of currently executing dbt job: {run_id}'
+            run_finish_time = datetime.strptime(run_finish_time, self.dbt_datetime_format)
+            
+            return f'run start: {str(dbt_job_run_start_time)} -- run finish: {run_finish_time}'
 
         # for i in range(max_tries):
         #     try:
