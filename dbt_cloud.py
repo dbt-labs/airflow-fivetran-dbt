@@ -97,7 +97,7 @@ class DbtCloudApi(object):
         kwargs['ti'].xcom_push(key='dbt_run_start_time', value=str(run_start_time))
 
         return {
-            'message': f'successfully triggered job {job_name}'
+            'message': f'successfully triggered job {job_name}',
             'response': trigger_resp
         }
 
