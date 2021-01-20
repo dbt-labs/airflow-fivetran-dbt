@@ -25,11 +25,13 @@ Below is a system diagram with a brief description of each step in the process
 3) User account in dbt with sufficient permissions to create database connections, repositories, and API keys. 
 4) User account in Github/Gitlab/Bitbucket etc with permissions to create repositories and associate ssh deploy keys with them. You can read more about this setup [here](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
 
-# GCP Configuration
-We mainly followed the process described in 
+# GCP & Airflow Server Configuration
+We mainly followed the process described in Jostein Leira's [Medium Post](https://medium.com/grensesnittet/airflow-on-gcp-may-2020-cdcdfe594019) 
 
-
+There are a couple of configurations we changed: 
+- Whitelist only the [Google IP Ranges](https://support.google.com/a/answer/60764?hl=en) and any developer IP addresses  
+- Install apache-airflow version `2.0.0` instead of `1.10.10`. Note that airflow command syntax changed slightly across major versions. The Airflow v2.0.0 CLI command syntax is documented [here](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html)  
 
 Sources
 ======
-<sup>1</sup> GCP Setup Guide created by Jostein Leira: https://www.google.com/search?q=airflow+on+gcp&oq=airflow+on+gcp&aqs=chrome..69i57j0i22i30l2j0i22i30i395l4j69i60.2077j1j7&sourceid=chrome&ie=UTF-8
+<sup>1</sup> GCP Setup Guide created by Jostein Leira: https://medium.com/grensesnittet/airflow-on-gcp-may-2020-cdcdfe594019
