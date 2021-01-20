@@ -74,7 +74,7 @@ class FivetranApi(object):
         connector_id = kwargs['dag_run'].conf['connector_id'] # this comes from the airflow runtime configs        
         
         ti = kwargs['ti']
-        connector_sync_start_time = ti.xcom_pull(key = 'start_time', task_ids='start_data_sync')
+        connector_sync_start_time = ti.xcom_pull(key = 'start_time', task_ids='fivetran_connector_sync')
         connector_sync_start_time = datetime.strptime(connector_sync_start_time, self.airflow_datetime_format)
         
         tracker = 0
