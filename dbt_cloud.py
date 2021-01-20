@@ -50,8 +50,8 @@ class DbtCloudApi(object):
     def get_run(self, run_id, **kwargs):
         return self._get('/accounts/%s/runs/%s/' % (self.account_id, run_id)).get('data')
 
-    def trigger_job_run(self, **kwargs):
-        job_id = kwargs['dag_run'].conf['dbt_job_id']
+    def trigger_job_run(self, job_id, **kwargs):
+        #job_id = kwargs['dag_run'].conf['dbt_job_id']
         
         data = {
             "cause": "triggered from Airflow"
@@ -60,6 +60,7 @@ class DbtCloudApi(object):
         response = self._post(url_suffix='/accounts/%s/jobs/%s/run/' % (self.account_id, job_id), data=data).get('data')
         run_id = response['id']
         run_start_time = datetime.now()
+        
         kwargs['ti'].xcom_push(key='dbt_run_id', value=str(run_id))
         kwargs['ti'].xcom_push(key='dbt_run_start_time', value=str(run_start_time))
         
@@ -68,18 +69,27 @@ class DbtCloudApi(object):
             'response': response
             }
 
-    def try_get_run(self, run_id, max_tries=3, **kwargs):
-        for i in range(max_tries):
-            try:
-                run = self.get_run(run_id)
-                return run
-            except RuntimeError as e:
-                print("Encountered a runtime error while fetching status for {}".format(run_id))
-                time.sleep(10)
+    def get_dbt_job_run_status(self, max_tries=3, **kwargs):
+        
+        ti = kwargs['ti']
+        run_id = ti.xcom_pull(key='dbt_run_id', task_ids='dbt_job')
 
-        raise RuntimeError("Too many failures ({}) while querying for run status".format(run_id))
+        return f'run_id of currently executing dbt job: {run_id}'
 
-    def run_job(self, job_name, data=None, **kwargs):
+        # for i in range(max_tries):
+        #     try:
+        #         run = self.get_run(run_id)
+        #         return run
+            
+        #     sexcept RuntimeError as e:
+        #         print("Encountered a runtime error while fetching status for {}".format(run_id))
+        #         time.sleep(10)
+
+        # raise RuntimeError("Too many failures ({}) while querying for run status".format(run_id))
+
+    def run_job(self, data=None, **kwargs):
+        job_name = kwargs['dag_run'].conf['dbt_job_name']
+
         jobs = self.list_jobs()
 
         job_matches = [j for j in jobs if j['name'] == job_name]
