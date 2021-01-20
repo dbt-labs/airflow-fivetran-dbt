@@ -68,20 +68,29 @@ class DbtCloudApi(object):
         # when the run_finished_at variable populates, we are done polling
         run_finished_at = None 
         run_response = None
+        run_status = None
         while not run_finished_at:
             # wait a bit between polls
             time.sleep(5)
 
             run_response = self.get_run(run_id=run_id)
             run_finished_at = run_response['finished_at']
+            run_status = run_response['status']
 
             tracker += 5
             if tracker > self.polling_timeout:
                 raise Exception(f'Error, the data sync for the {connector_id} connecter failed to complete within {self.polling_timeout} seconds')
         
-        return {
-            'message': f'job {job_name} finished running at {run_finished_at}',
-            'response': run_response
+        if run_status == 10:
+            return {
+                'message': f'job {job_name} ran successfully, finishing at {run_finished_at}',
+                'response': run_response
+                }
+        
+        else:
+            return {
+                'message': f'job {job_name} failed, finishing at {run_finished_at}',
+                'response': run_response
             }
 
     def run_job(self, **kwargs):
