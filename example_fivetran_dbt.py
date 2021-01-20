@@ -30,7 +30,9 @@ ft = FivetranApi(api_token=FIVETRAN_API_KEY,
 
 # initialize dbt Cloud module
 dbt = DbtCloudApi(account_id=DBT_ACCOUNT_ID, 
-                  api_token=DBT_API_KEY)
+                  api_token=DBT_API_KEY,
+                  airflow_datetime_format=AIRFLOW_DATETIME_FORMAT,
+                  dbt_datetime_format='placeholder')
 
 #default_args = {
     #'owner': 'airflow',
