@@ -13,6 +13,7 @@ class DbtCloudApi(object):
     * :py:meth:`trigger_job_run` - Trigger a Run for a specified Job ID
     * :py:meth: `try_get_run` - Attempts to get information about a specific Run ID for up to max_tries
     * :py:meth: `run_job` - Triggers a run for a job using the job name
+    * :py:meth: `get_job_run_manifest` - Returns the run manifest from the target job for downstream logging
     """
 
     def __init__(self, account_id, api_token, airflow_datetime_format, dbt_datetime_format):
