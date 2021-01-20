@@ -4,6 +4,8 @@ echo -n "Enter dbt API Key:";
 read dbt_api_key
 echo -n "Enter Fivetran API Key:";
 read -s fivetran_api_key
+echo -n "Enter dbt Account Id:";
+read -s dbt_account_id
 
 sudo su
 apt update
@@ -20,6 +22,7 @@ cd /srv
 python3.7 -m venv airflow
 cd airflow
 source bin/activate
+
 # With an activated virtual environment
 pip install --upgrade pip
 pip install wheel
@@ -30,3 +33,4 @@ chmod g+rwx . -R
 export AIRFLOW_HOME=/srv/airflow
 export FIVETRAN_API_KEY=$fivetran_api_key
 export DBT_API_KEY=$dbt_api_key
+export DBT_ACCOUNT_ID=$dbt_account_id
