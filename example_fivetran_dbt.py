@@ -76,7 +76,7 @@ run_get_dbt_job_status = PythonOperator(
 )
 
 run_extract_dbt_job_run_manifest = PythonOperator(
-    task_id='extract_dbt_job_run_manifest ',
+    task_id='extract_dbt_job_run_manifest',
     python_callable=dbt.get_job_run_manifest,
     dag=dag,
 )
