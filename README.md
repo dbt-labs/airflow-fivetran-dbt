@@ -51,7 +51,7 @@ Host *
 * It's useful to add a line to your `.bashrc` or `.zshrc` file to automatically start the agent and add your ssh keys each time you open a terminal. 
 * Add the key to your repository: 
 
-![alt-text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/git-repo-ssh-keys.png, "Adding Deploy Keys to a Repository")
+![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/git-repo-ssh-keys.png "Adding Deploy Keys to a Repository")
 
 
 ## Aiflow Environment Setup
