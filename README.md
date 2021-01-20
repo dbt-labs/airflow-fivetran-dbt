@@ -4,6 +4,15 @@ Example orchestration pipeline for Fivetran + dbt managed by Airflow
 # Introduction
 This is one way to orchetstrate dbt in coordination with other tools, such as Fivetran for data loading. Our focus is on coordinating Fivetran for loading data to a warehouse, and then triggering a dbt run in an event-driven pipeline. We use the Fivetran  and dbt Cloud APIs to accomplish this, with Airflow managing the scheduling / orchestration of the job flow. The final step extracts the `manifest.json` from the dbt run results to capture relevant metadata for downstream logging, alerting and analysis. The code provided in this repository are intended as a demonstration to build upon, *not* as a production-ready solution. 
 
+# Table of Contents
+1. [Highlights](#Highlights)  
+2. [Solution Architecture](#Solution-Architecture)  
+3. [Airflow DAG](#Airflow-DAG)  
+4. [dbt Job DAG](#dbt-Job-DAG)  
+5. [How to Guide](#How-to-Guide)   
+  * [Systems](#Systems)  
+  * [User permissions](#User-permissions)
+
 ## Highlights
 - logical isolation of data load (Fivetran), data transform (dbt) and orchestration (Airflow) functions
 - avoids complexity of re-creating dbt DAG in Airflow, which we've seen implemented at a few clients  
@@ -34,7 +43,7 @@ The dbt job run against this data is defined in [this repository](https://github
 
 ![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/dbt-lineage-graph.png "dbt Lineage Graph")
 
-# What you need to run this guide
+# How to Guide
 
 #### Systems
 1) Snowflake account with database, warehouse etc. configured  
