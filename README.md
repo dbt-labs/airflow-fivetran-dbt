@@ -89,7 +89,7 @@ connector_id = kwargs['dag_run'].conf['connector_id']
 #### From the command line
 With your virtual environment activated, run:  
 ```shell
-airflow dags trigger --conf '{"conf1": "value1"}' example_parametrized_dag
+airflow dags trigger --conf '{"connector_id": "warn_enormously", "dbt_job_name": "pokemon_aggregation_job"}' example_parametrized_dag
 ```
 
 
