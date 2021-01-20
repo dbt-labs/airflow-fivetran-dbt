@@ -45,14 +45,13 @@ We use ssh keys to manage both this git repository and the one containing dbt co
 Host *
   AddKeysToAgent yes
   UseKeychain yes
-  IdentityFile ~/.ssh/id_ed25519
+  IdentityFile ~/.ssh/<your-key-pair-name>
 ```
 * Add the ssh key to the agent: `ssh-add -K ~/.ssh/<your-key-pair-name>`
 * It's useful to add a line to your `.bashrc` or `.zshrc` file to automatically start the agent and add your ssh keys each time you open a terminal. 
 * Add the key to your repository: 
 
 ![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/git-repo-ssh-keys.png "Adding Deploy Keys to a Repository")
-
 
 ## Aiflow Environment Setup
 Shell scripts and service configuration files are located in the `airflow-setup` folder. 
@@ -66,7 +65,6 @@ The provided Python code uses several environment variables as configuration inp
 * `DBT_ACCOUNT_ID` which can be obtained from the URLs when logged in to dbt Cloud. For example in the URL cloud.getdbt.com/#/accounts/**<account-id>**/projects/<project-id>/dashboard/
 * `DBT_API_KEY` which can be obtained by navigating to Profile > API Access in dbt Cloud.
 * `DBT_DATETIME_FORMAT` set to `%Y-%m-%dT%H:%M:%S.%fZ` for a datetime like `2018-12-01T15:43:29.013729Z`
-
 
 
 
