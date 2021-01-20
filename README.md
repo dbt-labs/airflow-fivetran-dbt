@@ -32,7 +32,12 @@ There are a couple of configurations we changed:
 - Whitelist only the [Google IP Ranges](https://support.google.com/a/answer/60764?hl=en) and any developer IP addresses  
 - Install apache-airflow version `2.0.0` instead of `1.10.10`. Note that airflow command syntax changed slightly across major versions. The Airflow v2.0.0 CLI command syntax is documented [here](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html)  
 
-## Git Repository Configuration
+## Aiflow Environment Setup
+A configuration script is located [here](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/airflow-setup/env-setup.sh). The user is prompted for the dbt and Fivetran API Keys as inputs and store them in environment variables. It's additionally useful to modify the environment activiation script in `/srv/airflow/bin/activate` to automatically set and unset these variables each time the environment starts.  
+
+After running the shell script referenced above, verify you have a new directory under `/srv/airflow`. You should be able to run `source bin/activate` from this location to start your virtual environment.
+
+## SSH Key Configuration in Github
 We use ssh keys to manage both this git repository and the one containing dbt code. You need access to manage ssh keys for your repository (in Settings > Deploy Keys > Add Key). Below is an example of creating an ssh key and granting access in Github: 
 
 * Generate ssh key: `$ ssh-keygen -t ed25519 -C "your_email@example.com"`  
@@ -53,8 +58,8 @@ Host *
 
 ![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/git-repo-ssh-keys.png "Adding Deploy Keys to a Repository")
 
-## Aiflow Environment Setup
-A configuration script is located in `airflow-setup/env-setup.sh`. The user is prompted for the dbt and Fivetran API Keys as inputs and store them in environment variables. It's additionally useful to modify the environment activiation script in `/srv/airflow/bin/activate` to automatically set and unset these variables each time the environment starts.  
+## Git Repository Configuration
+Once you've set up the ssh key as described above, 
 
 ## Environment Variables  
 The provided Python code uses several environment variables as configuration inputs:  
@@ -79,11 +84,21 @@ The provided Python code uses several environment variables as configuration inp
 connector_id = kwargs['dag_run'].conf['connector_id']
 ```
 
-[alt text](placeholder "Adding configurations for a Airflow DAG run")
+[alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/airflow-dag-trigger-ui.png "Adding configurations for a Airflow DAG run")
 
-
+#### From the command line
+With your virtual environment activated, run:  
+```shell
+airflow dags trigger --conf '{"conf1": "value1"}' example_parametrized_dag
+```
 
 
 Sources
 ======
 <sup>1</sup> GCP Setup Guide created by Jostein Leira: https://medium.com/grensesnittet/airflow-on-gcp-may-2020-cdcdfe594019
+
+
+How we set up dbt projects
+SSO Documentation for Azure
+Codegen package
+dbt and Snowflake project setup
