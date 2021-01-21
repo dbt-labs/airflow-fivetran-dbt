@@ -34,3 +34,6 @@ export AIRFLOW_HOME=/srv/airflow
 export FIVETRAN_API_KEY=$fivetran_api_key
 export DBT_API_KEY=$dbt_api_key
 export DBT_ACCOUNT_ID=$dbt_account_id
+export FIVETRAN_DATETIME_FORMAT=%Y-%m-%dT%H:%M:%S.%fZ
+export DBT_DATETIME_FORMAT=%Y-%m-%dT%H:%M:%S.%fZ
+export AIRFLOW_DATETIME_FORMAT=%Y-%m-%dT%H:%M:%S.%fZ
