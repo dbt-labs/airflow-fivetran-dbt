@@ -39,13 +39,13 @@ If you are already using Airflow, you may want to skip the implementation guide 
 
 This is a simplified workflow meant to illustrate the coordination role Airflow can play between a data loading system like Fivetran and dbt. Airflow [XComs](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html?highlight=xcom#concepts-xcom) are used to share state among the tasks defined in the job. An example Xcom reference in the code is
 
-Add XCom value in upstream task
+Add XCom value in `dbt_job` task
 ```python
 run_id = trigger_resp['id']
 kwargs['ti'].xcom_push(key='dbt_run_id', value=str(run_id))
 ```
 
-Retrieve XCom value in downstream task
+Retrieve XCom value associated with `dbt_job` task in downstream `get_dbt_job_status` task
 ```python
 ti = kwargs['ti']
 run_id = ti.xcom_pull(key='dbt_run_id', task_ids='dbt_job')
