@@ -103,9 +103,8 @@ We use ssh keys to manage both this git repository and the one containing dbt co
 * If the configuration file doesn't exist, create it: `touch ~/.ssh/config`
 * Open the config file and replace the key Id as necessary: 
 ```
-Host *
+Host github.com-airflow-fivetran-dbt
   AddKeysToAgent yes
-  UseKeychain yes
   IdentityFile ~/.ssh/<your-key-pair-name>
 ```
 * Add the ssh key to the agent: `ssh-add -K ~/.ssh/<your-key-pair-name>`
