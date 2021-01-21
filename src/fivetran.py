@@ -60,7 +60,7 @@ class FivetranApi(object):
     
     def force_connector_sync(self, request_body={}, **kwargs):
         """Triggers a run of the target connector under connector_id"""
-        connector_id = kwargs['dag_run'].conf['connector_id'] # this comes from the airflow runtime configs
+        connector_id = kwargs['dag_run'].conf['fivetran_connector_id'] # this comes from the airflow runtime configs
         response = self._post(url_suffix=f'connectors/{connector_id}/force', data=request_body).get('data')
         start_time = datetime.now()
         kwargs['ti'].xcom_push(key='start_time', value=str(start_time))
@@ -72,7 +72,7 @@ class FivetranApi(object):
     
     def get_connector_sync_status(self, **kwargs):
         """Checks the execution status of connector"""
-        connector_id = kwargs['dag_run'].conf['connector_id'] # this comes from the airflow runtime configs        
+        connector_id = kwargs['dag_run'].conf['fivetran_connector_id'] # this comes from the airflow runtime configs        
         
         ti = kwargs['ti']
         connector_sync_start_time = ti.xcom_pull(key = 'start_time', task_ids='fivetran_connector_sync')
