@@ -33,11 +33,26 @@ Below is a system diagram with a brief description of each step in the process
 ![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/airflow-fivetran-dbt-arch.png "Solution Architecture Diagram")
 
 ## Aiflow DAG
-If you are already using Airflow, you may want to skip the implementation guide below and focus on the key parts of the python code which enable this workflow. The DAG process we implemented looks like this: 
+If you are already using Airflow, you may want to skip the implementation guide below and focus on the key parts of the python code which enable this workflow.
 
 ![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/airflow-dag-process.png "Airflow DAG")
 
-This is a simplified workflow meant to illustrate the coordination role Airflow can play between a data loading system like Fivetran and dbt. Airflow [XComs](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html?highlight=xcom#concepts-xcom) are used to share state among the tasks defined in the job. Additionally, the DAG takes a mapping for runtime input: 
+This is a simplified workflow meant to illustrate the coordination role Airflow can play between a data loading system like Fivetran and dbt. Airflow [XComs](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html?highlight=xcom#concepts-xcom) are used to share state among the tasks defined in the job. An example Xcom reference in the code is
+
+Add XCom value in upstream task
+```python
+run_id = trigger_resp['id']
+kwargs['ti'].xcom_push(key='dbt_run_id', value=str(run_id))
+```
+
+Retrieve XCom value in downstream task
+```python
+ti = kwargs['ti']
+run_id = ti.xcom_pull(key='dbt_run_id', task_ids='dbt_job')
+```
+
+
+Additionally, the DAG takes a mapping for runtime input: 
 ```
     { 
     "connector_id": "warn_enormously",
