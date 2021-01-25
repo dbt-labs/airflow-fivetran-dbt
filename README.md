@@ -1,8 +1,8 @@
 # airflow-fivetran-dbt
-Example orchestration pipeline for Fivetran + dbt managed by Airflow
+The purpose of this github repo is to provide an example how an orchestration pipeline for Fivetran + dbt managed by Airflow would look like. If you have any questions about this, feel free to ask in our [dbt Slack community](https://community.getdbt.com/).
 
 # Introduction
-This is one way to orchetstrate dbt in coordination with other tools, such as Fivetran for data loading. Our focus is on coordinating Fivetran for loading data to a warehouse, and then triggering a dbt run in an event-driven pipeline. We use the Fivetran  and dbt Cloud APIs to accomplish this, with Airflow managing the scheduling / orchestration of the job flow. The final step extracts the `manifest.json` from the dbt run results to capture relevant metadata for downstream logging, alerting and analysis. The code provided in this repository are intended as a demonstration to build upon, not as a production-ready solution. 
+This is one way to orchetstrate dbt in coordination with other tools, such as Fivetran for data loading. In this example, our focus is on coordinating a Fivetran sync for loading data to a warehouse, and then triggering a dbt run in an event-driven pipeline. We use the Fivetran and dbt Cloud APIs to accomplish this, with Airflow managing the scheduling / orchestration of the job flow. The final step extracts the `manifest.json` from the dbt run results to capture relevant metadata for downstream logging, alerting and analysis. The code provided in this repository are intended as a demonstration to build upon and should not be utilized as a production-ready solution. 
 
 # Table of Contents
 1. [Highlights](#Highlights)  
@@ -19,13 +19,14 @@ This is one way to orchetstrate dbt in coordination with other tools, such as Fi
    * [Environment variables](#Environment-variables)
    * [Running the code](#Running-the-code)
 
-## Highlights
-- logical isolation of data load (Fivetran), data transform (dbt) and orchestration (Airflow) functions
-- Airflow code would be portable to a tool like [Astronomer](https://www.astronomer.io/)  
-- avoids complexity of re-creating dbt DAG in Airflow, which we've seen implemented at a few clients  
-- demonstrates orchestrating Fivetran and dbt in an event-driven pipeline  
-- configurable approach which can be extended to handle additional Fivetran connectors and dbt job definitions  
-- captures relevant data from a job run which could be shipped to downstream logging & analytics services. It would also be feasible to log interim job status data using this setup, though we did not build it  into the current python codebase
+## Highlights 
+This repository aims to: 
+- display logical isolation of data load (Fivetran), data transform (dbt) and orchestration (Airflow) functions
+- provide Airflow code would be portable to a tool like [Astronomer](https://www.astronomer.io/)  
+- avoids complexity of re-creating dbt DAG in Airflow 
+- demonstrate orchestrating Fivetran and dbt in an event-driven pipeline  
+- provide a configurable approach which can be extended to handle additional Fivetran connectors and dbt job definitions  
+- capture relevant data from a job run which could be shipped to downstream logging & analytics services. It would also be feasible to log interim job status data using this setup, though we did not build it  into the current python codebase
 
 ## Solution Architecture
 Below is a system diagram with a brief description of each step in the process
@@ -75,10 +76,10 @@ The dbt job run against this data is defined in [this repository](https://github
 5) dbt Cloud account  
 6) Git repository for dbt code. Here is a [link to ours](https://github.com/fishtown-analytics/airflow-fivetran-dbt--dbt-jobs)
 
-#### User permissions
-1) User with access to run database operations in Snowflake. dbt operates under a user account alias  
+#### User permissions required
+1) User with access to run database operations in Snowflake. dbt cloud operates under a user account alias  
 2) User account in Fivetran with permissions to create new connectors. In this example, we use Google Sheets as the connector source data. You will also need sufficient permissions (or a friend who has them :) ) to obtain an API token and secret from the Fivetran Admin console as described [here](https://fivetran.com/docs/rest-api/getting-started)  
-3) User account in dbt with sufficient permissions to create database connections, repositories, and API keys. 
+3) User account in dbt Cloud with sufficient permissions to create database connections, repositories, and API keys. 
 4) User account in Github/Gitlab/Bitbucket etc with permissions to create repositories and associate ssh deploy keys with them. You can read more about this setup [here](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
 
 #### Airflow server configuration
