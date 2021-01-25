@@ -85,8 +85,18 @@ The dbt job run against this data is defined in [this repository](https://github
 #### Airflow server configuration
 We mainly followed the process described in Jostein Leira's [Medium Post](https://medium.com/grensesnittet/airflow-on-gcp-may-2020-cdcdfe594019) <sup>1</sup>
 
+Key Notes not mentioned in Jostein Leira's Post:
+- Make sure to create the instance in the desired project (whether an existing one or a new one)
+- You will need to enable the Compute Engine API
+- When you create the subnet, make sure to select a region that makes sense to your infastructure. 
+- For your VM machine type, use E2 series. 
+- You do not need to setup a load balancer for this flow. 
+- When you go to setup your Postgres database, do not click on Storage. The interface has updated and you should see 
+`SQL` in the GCP console. 
+/* Include information about connections that are not in the doc */
+
 There are a couple of configurations we changed: 
-- Whitelist only the [Google IP Ranges](https://support.google.com/a/answer/60764?hl=en) and any developer IP addresses  
+- Whitelist only the [Google IP Ranges](https://support.google.com/a/answer/60764?hl=en) and any developer IP addresses. You will be asked this when you setup the VPC.  
 - Install apache-airflow v2.0.0 instead of v1.10.10. Note that airflow command syntax changed slightly across major versions. The Airflow v2.0.0 CLI command syntax is documented [here](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html)  
 
 #### Aiflow environment setup
