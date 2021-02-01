@@ -21,7 +21,7 @@ This is one way to orchetstrate dbt in coordination with other tools, such as Fi
 
 ## Highlights
 - logical isolation of data load (Fivetran), data transform (dbt) and orchestration (Airflow) functions
-- Airflow code would be portable to a tool like [Astronomer](https://www.astronomer.io/)  
+- Airflow code can be run from a managed service like [Astronomer](https://www.astronomer.io/)  
 - avoids complexity of re-creating dbt DAG in Airflow, which we've seen implemented at a few clients  
 - demonstrates orchestrating Fivetran and dbt in an event-driven pipeline  
 - configurable approach which can be extended to handle additional Fivetran connectors and dbt job definitions  
@@ -83,7 +83,7 @@ The dbt job run against this data is defined in [this repository](https://github
 
 ### Airflow Installation
 
-We configured a VM in Google Cloud Platform to host the Airflow server. There are many options for hosting, including managed services like [Astronomer](https://www.astronomer.io/). Your preferred installation method will likely depend on your company's security posture and your desire to customize the implementation.
+We configured a VM in Google Cloud Platform to host the Airflow server. There are many options for hosting, including managed services like [Astronomer](https://www.astronomer.io/). Your preferred installation method will likely depend on your company's security posture and your desire to customize the implementation. 
 
 We began by following the process described in Jostein Leira's [Medium Post](https://medium.com/grensesnittet/airflow-on-gcp-may-2020-cdcdfe594019) <sup>1</sup>. During the installation, we implemented several changes and additions to the architecture, described below. 
 
@@ -103,6 +103,8 @@ The specific steps to set up and test each of these components are described bel
 ### Create the GCP Project  
 
 The project will contain all the resources you create in the following steps. Click the project dropdown at the top left of the console and create a new project. We named ours `airflow-server`.  
+
+![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/gcp-create-project.png "Create new GCP project")
 
 ### Create the VPC Network
 
@@ -129,6 +131,8 @@ First we'll set up the VPC in which the Airflow VM will run. When first accessin
 
 When you're done, the firewall rules should look as shown in the screenshot below.  
 
+![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/gcp-create-firewall-rules.png "VPC firewall rules")
+
 ### Create the Virtual Machine  
 
 1) Click the hamburger icon at the top left of the console > Compute Engine > Virtual Machines > VM Instances > Create  
@@ -140,6 +144,8 @@ When you're done, the firewall rules should look as shown in the screenshot belo
 7) Place the instance in the VPC Network you created in the VPC setup step  
 -- Leave the rest of the defaults when adding the instance to your VPC  
 -- Optional -- you can use the `env-setup.sh` script in the `airflow-setup` folder of this repository to bootstrap the instance when it starts.  
+
+![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/gcp-place-instance-in-network.png "Add the instance to your network")
 
 ### Create the Instance Group  
 
@@ -163,55 +169,59 @@ GCP offers multiple options for ssh access to instances, including via the brows
 6) If you configured a password on your ssh key, enter it when prompted  
 -- Upon successful login, your terminal should look similar to the image below
 
-#TODO add image
-
 #### SSH from the browser
 
-1) Navigate back to the VM instance screen  
-2) Ensure that you've set up [OS Login](https://cloud.google.com/compute/docs/instances/managing-instance-access#enable_oslogin). You can set this on the project level or instance level. Here is an example of setting this at the instance level:  
+1) Ensure that you've set up [OS Login](https://cloud.google.com/compute/docs/instances/managing-instance-access#enable_oslogin). You can set this on the project level or instance level. Here is an example of setting this at the instance level:  
 
-#TODO: add image 
+![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/gcp-ssh-to-vm.png "SSH to the VM")
 
-3) Run `gcloud auth login` to ensure you're logged in to your account  
-4) Run the command below in your terminal
+2) Whitelist the list of Google IPs [listed here](https://www.gstatic.com/ipranges/goog.json) for port 22 in your custom network. Connections from the browser are initiated from a Google IP, not your network's IP.  
+3) Navigate back to the VM instance screen  
+4) Click the "SSH" buttom to the right of your VM's listing  
 
-```
-gcloud compute os-login ssh-keys add \
-    --key-file=KEY_FILE_PATH \
-    --ttl=EXPIRE_TIME
-```
+### Cloning this Git Repository to the VM
 
+#### SSH key configuration in Github
+We use ssh keys to manage both this git repository with the Airflow code and the one containing dbt code. You will need access to manage ssh keys for your repository (in Settings > Deploy Keys > Add Key). Below is an example of creating an ssh key and granting access in Github: 
 
-### Aiflow environment setup
-A configuration script is located [here](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/airflow-setup/env-setup.sh). The user is prompted for the dbt and Fivetran API Keys as inputs and store them in environment variables. It's additionally useful to modify the environment activiation script in `/srv/airflow/bin/activate` to automatically set and unset these variables each time the environment starts.  
+1) Generate ssh key: `$ ssh-keygen -t ed25519 -C "your_email@example.com"`  
+2) Choose where to save the key, e.g. $HOME/.ssh/<your-key-pair-name>
+3) Start the ssh agent in the background: `eval "$(ssh-agent -s)"`
+4) If the configuration file doesn't exist, create it: `vim ~/.ssh/config`
+5) Open the config file and replace the key Id as necessary: 
 
-After running the shell script referenced above, verify you have a new directory under `/srv/airflow`. You should be able to run `source bin/activate` from this location to start your virtual environment.
-
-### SSH key configuration in Github
-We use ssh keys to manage both this git repository and the one containing dbt code. You need access to manage ssh keys for your repository (in Settings > Deploy Keys > Add Key). Below is an example of creating an ssh key and granting access in Github: 
-
-* Generate ssh key: `$ ssh-keygen -t ed25519 -C "your_email@example.com"`  
-* Choose where to save the key, e.g. $HOME/.ssh/<your-key-pair-name>
-* Start the ssh agent in the background: `eval "$(ssh-agent -s)"`
-* Check for existing ssh configuration: `open ~/.ssh/config`
-* If the configuration file doesn't exist, create it: `touch ~/.ssh/config`
-* Open the config file and replace the key Id as necessary: 
 ```
 Host github.com-airflow-fivetran-dbt
   AddKeysToAgent yes
   IdentityFile ~/.ssh/<your-key-pair-name>
 ```
-* Add the ssh key to the agent: `ssh-add -K ~/.ssh/<your-key-pair-name>`
-* It's useful to add a line to your `.bashrc` or `.zshrc` file to automatically start the agent and add your ssh keys each time you open a terminal. 
-* Add the key to your repository: 
+
+6) Add the ssh key to the agent: `ssh-add ~/.ssh/<your-key-pair-name>`
+Note: It's useful to add a line to your `.bashrc` or `.zshrc` file to automatically start the agent and add your ssh keys each time you open a terminal. 
+7) run `cd ~/.ssh/`  
+8) run `cat <your-key-pair-name>.pub`  
+9) Copy the output on the screen  
+10) In github, add the public key to the repository. This is in Settings > Deploy Keys > Add New Key. The screenshot below shows what this looks like  
 
 ![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/git-repo-ssh-keys.png "Adding Deploy Keys to a Repository")
 
-### Git repository configuration
-Once you've set ssh keys for both the airflow and dbt code repositories, you clone the respective codebases on the airflow server and in dbt Cloud. Instructions for configuring Github repositories in dbt Cloud are [here](https://docs.getdbt.com/docs/dbt-cloud/cloud-configuring-dbt-cloud/cloud-installing-the-github-application)
+11) Run `cd /srv/airflow`  
+12) Run `git clone git@github.com:fishtown-analytics/airflow-fivetran-dbt.git` to clone the repository
 
-### Environment variables  
-The provided Python code uses several environment variables as configuration inputs:  
+### Cloning the dbt Code repository in dbt Cloud
+
+Note, this repository is related to [another](https://github.com/fishtown-analytics/airflow-fivetran-dbt--dbt-jobs) which contains the dbt code run in the job triggered from Airflow. You'll need to set a similar repository to run the dbt jobs for your setup. Instructions for cloning git repositories in dbt Cloud can be found [here](https://docs.getdbt.com/docs/dbt-cloud/cloud-configuring-dbt-cloud/cloud-import-a-project-by-git-url)
+
+Once you've set ssh keys for both the airflow and dbt code repositories,  clone the respective codebases on the airflow server and in dbt Cloud. Instructions for configuring Github repositories in dbt Cloud are [here](https://docs.getdbt.com/docs/dbt-cloud/cloud-configuring-dbt-cloud/cloud-installing-the-github-application)
+
+### Aiflow environment setup
+Make sure you have the Fivetran API Key, dbt Cloud API Key, and dbt Cloud Account ID handy before going further. These are set into environment variables for Airflow.  
+
+1) Run `source airflow-fivetran-dbt/airflow-setup/start-airflow-venv.sh`  
+2) Set the environment variables for the Fivetran API Key, dbt Cloud API Key and dbt Cloud Account ID  
+3) Feel free to manage the virtual environment and environment variables as suits you  
+
+Below is a description of each environment variable set by the script.  
 
 * `FIVETRAN_API_KEY`: This is a base64 encoded value of your account's `<api-key>:<api-secret>`. [This link from Fivetran](https://fivetran.com/docs/rest-api/getting-started) documents how to generate this value. For example, an API key of `d9c4511349dd4b86` and API secret of `1f6f2d161365888a1943160ccdb8d968` encode to `ZDljNDUxMTM0OWRkNGI4NjoxZjZmMmQxNjEzNjU4ODhhMTk0MzE2MGNjZGI4ZDk2OA==`. The specific values will be different on your system.  
 * `FIVETRAN_DATETIME_FORMAT` set to `%Y-%m-%dT%H:%M:%S.%fZ` for a datetime like `2018-12-01T15:43:29.013729Z`
@@ -220,7 +230,73 @@ The provided Python code uses several environment variables as configuration inp
 * `DBT_API_KEY` which can be obtained by navigating to Profile > API Access in dbt Cloud.
 * `DBT_DATETIME_FORMAT` set to `%Y-%m-%dT%H:%M:%S.%fZ` for a datetime like `2018-12-01T15:43:29.013729Z`
 
-#### Running the code
+### Setting up the Postgres Database
+
+Airflow persits artifacts into a database, often Postgresql.  
+
+1) Navigate to the hamburger icon at the top left > Databases > SQL  
+2) Click "Create Instance"  
+3) Give the instance a name and default user password  
+4) Click "Connectivity"  
+5) Check the option for "Private IP", associate the instance with your vpc network, and uncheck the "Public IP" option at the bottom of the Connectivity tab  
+6) Click "Allocate and Connect"  
+
+![alt text](https://github.com/fishtown-analytics/airflow-fivetran-dbt/blob/main/images/gcp-associate-db-instance-with-network.png "Add db instance to your network")
+
+7) Under the SQL menu at the top left, click "Databases"  
+8) Click "Create database" and give your database a name  
+9) Under the SQL menu at the top left, click "Users" and add a new user  
+10) Be sure to add a user to the instance and not a Cloud IAM user  
+
+### Test database connectivity
+
+Note: make sure that the psql client is installed on your instance. This aspect is skipped in the guide linked from Medium above. If missing, you can install the client by running the following: 
+
+```
+sudo apt-get -y install postgresql-client-<version>
+```
+
+From the Airflow VM, test connectivity to the db instance
+
+```
+psql -h <db-server-ip> -U airflow-user -d airflow
+```
+
+Then enter the password you set when configuring the database  
+
+
+### Start the Airflow server
+
+1) Run the following sequence of commands:  
+  * `sudo su airflow`  
+  * `cd /srv/airflow`  
+  * `source bin/activate`  
+  * `export AIRFLOW_HOME=/srv/airflow`  
+  * `airflow db init`  
+
+2) Now you will update the `airflow.cfg` file to point airflow towards your sql database server instead of the default sqlite database. Update the following configurations in the file: 
+
+`sql_alchemy_conn = postgresql+psycopg2://airflow-user:<db-password>@<db-server-ip>/<database-name>`
+`default_impersonation = airflow`  
+`enable_proxy_fix = True`  
+
+3) Run `airflow db init` again
+4) Run 
+```
+airflow users create \
+          --username <user-name> \
+          --password <password>
+          --firstname <first-name> \
+          --lastname <last-name> \
+          --role Admin \
+          --email <email>@example.org
+```
+5) Run `airflow webserver -p 8080`  
+6) Run `airflow scheduler`  
+
+You now have a functioning system to which you can upload the [airflow code provided here](https://github.com/fishtown-analytics/airflow-fivetran-dbt). Add the load balancer configuration per instructions in the linked Medium post. Additionally, we provide service configuration files in this repository as well to run your airflow webserver automatically upon starting up the VM.  
+
+### Running the code
 
 -- From the Airflow UI -- 
 
