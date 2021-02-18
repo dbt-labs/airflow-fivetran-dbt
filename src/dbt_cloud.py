@@ -1,3 +1,4 @@
+## Sourced from: https://github.com/dwallace0723/dbt-cloud-plugin/
 
 # -*- coding: utf-8 -*-
 import json
