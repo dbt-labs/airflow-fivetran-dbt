@@ -1,8 +1,8 @@
 # airflow-fivetran-dbt
-Example orchestration pipeline for Fivetran + dbt managed by Airflow
+The purpose of this github repo is to provide an example of what an orchestration pipeline for Fivetran + dbt managed by Airflow would look like. If you have any questions about this, feel free to ask in our [dbt Slack community](https://community.getdbt.com/).
 
 # Introduction
-This is one way to orchetstrate dbt in coordination with other tools, such as Fivetran for data loading. Our focus is on coordinating Fivetran for loading data to a warehouse, and then triggering a dbt run in an event-driven pipeline. We use the Fivetran  and dbt Cloud APIs to accomplish this, with Airflow managing the scheduling / orchestration of the job flow. The final step extracts the `manifest.json` from the dbt run results to capture relevant metadata for downstream logging, alerting and analysis. The code provided in this repository are intended as a demonstration to build upon, not as a production-ready solution. 
+This is one way to orchetstrate dbt in coordination with other tools, such as Fivetran for data loading. In this example, our focus is on coordinating a Fivetran sync for loading data to a warehouse, and then triggering a dbt run in an event-driven pipeline. We use the Fivetran and dbt Cloud APIs to accomplish this, with Airflow managing the scheduling / orchestration of the job flow. The final step extracts the `manifest.json` from the dbt run results to capture relevant metadata for downstream logging, alerting and analysis. The code provided in this repository are intended as a demonstration to build upon and should not be utilized as a production-ready solution. 
 
 # Table of Contents
 1. [Highlights](#Highlights)  
@@ -18,6 +18,7 @@ This is one way to orchetstrate dbt in coordination with other tools, such as Fi
    * [Git repository configuration](#Git-repository-configuration)
    * [Environment variables](#Environment-variables)
    * [Running the code](#Running-the-code)
+
 
 ## Highlights
 - logical isolation of data load (Fivetran), data transform (dbt) and orchestration (Airflow) functions
@@ -75,17 +76,29 @@ The dbt job run against this data is defined in [this repository](https://github
 5) dbt Cloud account  
 6) Git repository for dbt code. Here is a [link to ours](https://github.com/fishtown-analytics/airflow-fivetran-dbt--dbt-jobs)
 
+
 ### User permissions
 1) User with access to run database operations in Snowflake. dbt operates under a user account alias  
 2) User account in Fivetran with permissions to create new connectors. In this example, we use Google Sheets as the connector source data. You will also need sufficient permissions (or a friend who has them :) ) to obtain an API token and secret from the Fivetran Admin console as described [here](https://fivetran.com/docs/rest-api/getting-started)  
-3) User account in dbt with sufficient permissions to create database connections, repositories, and API keys. 
+3) User account in dbt Cloud with sufficient permissions to create database connections, repositories, and API keys. 
 4) User account in Github/Gitlab/Bitbucket etc with permissions to create repositories and associate ssh deploy keys with them. You can read more about this setup [here](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
 
 ### Airflow Installation
 
+Key Notes not mentioned in Jostein Leira's Post:
+- Make sure to create the instance in the desired project (whether an existing one or a new one)
+- You will need to enable the Compute Engine API
+- When you create the subnet, make sure to select a region that makes sense to your infastructure. 
+- For your VM machine type, use E2 series. 
+- You do not need to setup a load balancer for this flow. 
+- When you go to setup your Postgres database, do not click on Storage. The interface has updated and you should see 
+`SQL` in the GCP console. 
+- Whitelist only the [Google IP Ranges](https://support.google.com/a/answer/60764?hl=en) and any developer IP addresses. You will be asked this when you setup the VPC.  
+- Install apache-airflow v2.0.0 instead of v1.10.10. Note that airflow command syntax changed slightly across major versions. The Airflow v2.0.0 CLI command syntax is documented [here](https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html)  
+
 We configured a VM in Google Cloud Platform to host the Airflow server. There are many options for hosting, including managed services like [Astronomer](https://www.astronomer.io/). Your preferred installation method will likely depend on your company's security posture and your desire to customize the implementation. 
 
-We began by following the process described in Jostein Leira's [Medium Post](https://medium.com/grensesnittet/airflow-on-gcp-may-2020-cdcdfe594019) <sup>1</sup>. During the installation, we implemented several changes and additions to the architecture, described below. 
+We began by following the process described in Jostein Leira's [Medium Post](https://medium.com/grensesnittet/airflow-on-gcp-may-2020-cdcdfe594019) <sup>1</sup>. During the installation, we implemented several changes and additions to the architecture, described below.
 
 The elemnts included in the final GCP setup include:
 
